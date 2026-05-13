@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: longhorn-system
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: longhorn
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: https://charts.longhorn.io
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: longhorn
+      version: "1.11.2"
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+        namespace: flux-system
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # Reference: https://longhorn.io/docs/1.11.2/references/helm-values/
+    persistence:
+      defaultClassReplicaCount: 1
+    defaultSettings:
+      # forbid scheduling to nodes with healthy replicas of the same volume
+      replicaSoftAntiAffinity: false
+      replicaDiskSoftAntiAffinity: false
+      replicaZoneSoftAntiAffinity: false
+      # allow if secondary node is offline, the primary can still function degraded
+      allowVolumeCreationWithDegradedAvailability: true
