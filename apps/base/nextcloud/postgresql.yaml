@@ -1,0 +1,42 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: postgresql
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: oci://registry-1.docker.io/bitnamicharts/postgresql
+  ref:
+    semver: "18.3.0"
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: postgresql
+  namespace: nextcloud
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: postgresql
+      sourceRef:
+        kind: HelmRepository
+        name: postgresql
+        namespace: flux-system
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # Reference: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/README.md
+    global:
+      defaultStorageClass: "longhorn-2node"
+    volumePermissions:
+      enabled: true
+    primary:
+      persistence:
+        enabled: true
+        size: "10Gi"
+      nodeSelector:
+        # Node on which Postgresql should run
+        # In case of an outtage of this node, change it to the secondary node name
+        kubernetes.io/hostname: "dean-homelab"
