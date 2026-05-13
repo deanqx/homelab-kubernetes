@@ -1,9 +1,8 @@
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
 metadata:
   name: postgresql
   namespace: nextcloud
 spec:
-  chart:
-    spec:
-      version: "18.3.0"
+  ref:
+    semver: "18.3.0"
