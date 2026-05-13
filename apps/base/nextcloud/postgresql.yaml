@@ -2,12 +2,10 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: postgresql
-  namespace: flux-system
+  namespace: nextcloud
 spec:
   interval: 10m
   url: oci://registry-1.docker.io/bitnamicharts/postgresql
-  ref:
-    semver: "18.3.0"
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -16,13 +14,10 @@ metadata:
   namespace: nextcloud
 spec:
   interval: 10m
-  chart:
-    spec:
-      chart: postgresql
-      sourceRef:
-        kind: HelmRepository
-        name: postgresql
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: postgresql
+    namespace: nextcloud
   upgrade:
     remediation:
       retries: 3

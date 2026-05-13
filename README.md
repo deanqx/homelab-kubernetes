@@ -62,7 +62,24 @@ Troubleshooting
 git revert <working-commit-hash>
 ```
 
-## Flux is not applying changes
+## FluxCD
+
+The Flux CLI has to be installed on your local machine.
+
+### Logs about reconcilation process
+
+```zsh
+flux logs
+```
+
+### View status of manifests apply process
+
+```zsh
+kubectl -n flux-system get kustomizations
+kubectl -n flux-system describe kustomization <component>
+```
+
+### Flux is not applying changes
 
 The most common cause is that newly created manifests are no specified in
 Kustomization files. To verify that Flux applied the latest git commit:

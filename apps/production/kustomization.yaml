@@ -4,5 +4,3 @@ resources:
   - ../base/nextcloud
 patches:
   - path: postgresql-patch.yaml
-    target:
-      kind: HelmRelease
