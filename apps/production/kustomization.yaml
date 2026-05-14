@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - ../base/nextcloud
 patches:
-  - path: postgresql-patch.yaml
+  - path: versions.yaml

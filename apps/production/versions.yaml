@@ -1,0 +1,19 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: postgresql
+  namespace: nextcloud
+spec:
+  ref:
+    # https://hub.docker.com/r/bitnamicharts/postgresql/tags
+    semver: "18.6.6"
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: redis
+  namespace: nextcloud
+spec:
+  ref:
+    # https://hub.docker.com/r/bitnamicharts/redis/tags
+    semver: "25.5.3"

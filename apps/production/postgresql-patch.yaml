@@ -1,8 +1,0 @@
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: OCIRepository
-metadata:
-  name: postgresql
-  namespace: nextcloud
-spec:
-  ref:
-    semver: "18.3.0"

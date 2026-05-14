@@ -4,3 +4,4 @@ namespace: nextcloud
 resources:
   - namespace.yaml
   - postgresql.yaml
+  - redis.yaml
