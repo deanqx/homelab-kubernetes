@@ -64,13 +64,7 @@ git revert <working-commit-hash>
 
 ## FluxCD
 
-The Flux CLI has to be installed on your local machine.
-
-### Logs about reconcilation process
-
-```zsh
-flux logs
-```
+It is recommended that the Flux CLI is installed on your local machine.
 
 ### View status of manifests apply process
 
@@ -79,20 +73,20 @@ kubectl -n flux-system get kustomizations
 kubectl -n flux-system describe kustomization <component>
 ```
 
-### Flux is not applying changes
+### Changes are not applied
+
+Keep in mind that the apply process (reconcilation) can take a few minutes.
 
 The most common cause is that newly created manifests are no specified in
 Kustomization files. To verify that Flux applied the latest git commit:
- 
+
 ```zsh
 flux get kustomizations
 ```
 
-The output should look something like this:
+You can check if the OCIRepository is not even loaded, OCI is sometimes used
+for Helm.
 
-```
-NAME             	REVISION          	SUSPENDED	READY	MESSAGE
-flux-system      	main@sha1:b8fc2d1f	False    	True 	Applied revision: main@sha1:b8fc2d1f	
-infra-configs    	main@sha1:b8fc2d1f	False    	True 	Applied revision: main@sha1:b8fc2d1f	
-infra-controllers	main@sha1:b8fc2d1f	False    	True 	Applied revision: main@sha1:b8fc2d1f
+```zsh
+flux get sources oci -A
 ```
