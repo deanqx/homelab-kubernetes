@@ -1,36 +1,39 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
-  name: postgresql
+  name: redis
   namespace: nextcloud
 spec:
   interval: 10m
-  url: oci://registry-1.docker.io/bitnamicharts/postgresql
+  url: oci://registry-1.docker.io/bitnamicharts/redis
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: postgresql
+  name: redis
   namespace: nextcloud
 spec:
   interval: 10m
   chartRef:
     kind: OCIRepository
-    name: postgresql
+    name: redis
     namespace: nextcloud
   upgrade:
     remediation:
       retries: 3
   values:
-    # Reference: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/README.md
-    global:
-      defaultStorageClass: "longhorn-2node"
-    volumePermissions:
-      enabled: true
-    primary:
-      persistence:
-        enabled: true
-        size: "10Gi"
+    # Reference: https://github.com/bitnami/charts/blob/main/bitnami/redis/README.md
+    architecture: standalone
+    master:
+      persistance:
+        enabled: false
       nodeSelector:
         # In case of an outtage of this node, change it to the secondary node name
         kubernetes.io/hostname: "dean-homelab"
+      resources:
+        requests:
+          cpu: 1
+          memory: 128Mi
+        limits:
+          cpu: 2
+          memory: 1024Mi
