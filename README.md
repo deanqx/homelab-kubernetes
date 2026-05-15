@@ -10,10 +10,15 @@ The example repo was used as reference:
 The entry point for FluxCD is `clusters/production`.
 From there it uses Kustomization files to find the manifests.
 
+Overview
+========
+
+- Mozilla SOPS is used to encrypt secrets like database passwords.
+
 Installation
 ============
 
-## Longhorn
+## 1 Longhorn storage
 
 ### Installation
 
@@ -31,21 +36,129 @@ sudo -E ./longhornctl install preflight
 sudo -E ./longhornctl check preflight
 ```
 
-Usage
-=====
+## 2 Install FluxCD on the cluster
 
-## Check changes
+```zsh
+sudo pacman --needed -S flux
+```
+
+Generate SSH Key without password and save it to a temporary location.
+
+```zsh
+ssh-keygen -t ed25519 -C "flux@homelab"
+```
+
+Output and `/tmp/flux_ssh` entered:
+
+```
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/home/dean/.ssh/id_ed25519): /tmp/flux_ssh
+```
+
+Give public key (`/tmp/flux_ssh.pub`) in Git repository read permission.
+
+```zsh
+cat /tmp/flux_ssh.pub
+```
+
+Install FluxCD on the cluster and apply the repository.
+
+```zsh
+flux bootstrap git \
+  --url=ssh://git@codeberg.org/deanqx/homelab-kubernetes.git \
+  --branch=main \
+  --private-key-file=/tmp/flux_ssh \
+  --path=clusters/production
+```
+
+## 3 Generate encryption key for secrets
+
+```zsh
+sudo pacman --needed -S gnupg sops
+```
+
+Generate GPG RSA key pair without password.
+
+```zsh
+export KEY_NAME="homelab"
+export KEY_COMMENT="flux secrets"
+
+gpg --batch --full-generate-key <<EOF
+%no-protection
+Key-Type: 1
+Key-Length: 4096
+Subkey-Type: 1
+Subkey-Length: 4096
+Expire-Date: 0
+Name-Comment: ${KEY_COMMENT}
+Name-Real: ${KEY_NAME}
+EOF
+```
+
+The output shows the footprint of the new key.
+
+```
+gpg: revocation certificate stored as
+'~/.gnupg/openpgp-revocs.d/E583935F5865EDC23D5181A91E3CEBDDA65179A0.rev'
+```
+
+The footprint isn't secret and it's no problem for it to show up in your shell
+history.
+
+```zsh
+export KEY_FP=E583935F5865EDC23D5181A91E3CEBDDA65179A0
+```
+
+Create the `sops-gpg` secret in Kubernetes which contains the private key.
+
+```zsh
+gpg --export-secret-keys --armor "${KEY_FP}" |
+kubectl create secret generic sops-gpg \
+--namespace=flux-system \
+--from-file=sops.asc=/dev/stdin
+```
+
+Store the public key in the Git repository so the DevOps team can encrypt
+secrets. They can't decrypt them with the public key.
+
+```zsh
+gpg --export --armor "${KEY_FP}" > ./clusters/production/.sops.pub.asc
+```
+
+Commit the public key
+
+```zsh
+git add ./clusters/production/.sops.pub.asc
+git commit -m 'ops: add public key for secrets generation'
+```
+
+You can now delete the private key from your personal computer.
+
+```zsh
+gpg --delete-secret-keys "${KEY_FP}"
+```
+
+Developing
+==========
+
+## 1 Create secrets
+
+```zsh
+gpg --import ./clusters/production/.sops.pub.asc
+```
+
+## 2 Check changes
 
 The diff command is used to do a server-side dry-run on flux resources
 and print the difference.
 
 ```zsh
-flux diff kustomization my-app --path apps/${APP}
+flux diff kustomization my-app --path apps/<app>
 ```
 
 `my-app` refers to the deployment in the cluster.
 
-## Apply changes in the cluster
+## 3 Apply changes in the cluster
 
 ```zsh
 git add -A
