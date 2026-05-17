@@ -216,8 +216,20 @@ Kustomization files. To verify that Flux applied the latest git commit:
 flux get kustomizations
 ```
 
-You can check if the OCIRepository is not even loaded, OCI is sometimes used
-for Helm.
+Check if Helm was successful.
+
+```zsh
+flux get helmreleases -A
+```
+
+If Helm failed too many times, it goes into a timeout state. You can restart
+the installation of a app with:
+
+```zsh
+kubectl -n flux-system rollout restart deploy helm-controller
+```
+
+OCI is sometimes used for Helm. You can check if the OCIRepository isn't loaded.
 
 ```zsh
 flux get sources oci -A
