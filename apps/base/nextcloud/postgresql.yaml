@@ -18,6 +18,9 @@ spec:
     kind: OCIRepository
     name: postgresql
     namespace: nextcloud
+  install:
+    remediation:
+      retries: 3
   upgrade:
     remediation:
       retries: 3
