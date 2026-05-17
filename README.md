@@ -160,13 +160,14 @@ sops --encrypt --in-place apps/production/secrets/nextcloud-postgresql.yaml
 ```
 
 Update `apps/production/kustomization.yaml` to include the new secrets.
+Make sure to add the secret before the HelmRelease.
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ...
   - secrets/nextcloud-postgresql.yaml
+  - ...
 ```
 
 ## 2 Check changes
