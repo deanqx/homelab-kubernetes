@@ -27,6 +27,9 @@ spec:
         kind: HelmRepository
         name: longhorn
         namespace: longhorn-system
+  install:
+    remediation:
+      retries: 3
   upgrade:
     remediation:
       retries: 3
