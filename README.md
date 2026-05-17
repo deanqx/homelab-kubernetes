@@ -55,20 +55,35 @@ Generating public/private ed25519 key pair.
 Enter file in which to save the key (/home/dean/.ssh/id_ed25519): /tmp/flux_ssh
 ```
 
-Give public key (`/tmp/flux_ssh.pub`) in Git repository read permission.
+Give read permissions of public key (`/tmp/flux_ssh.pub`) to Git repository.
 
 ```zsh
 cat /tmp/flux_ssh.pub
 ```
 
-Install FluxCD on the cluster and apply the repository.
+Install FluxCD on the cluster.
 
 ```zsh
-flux bootstrap git \
-  --url=ssh://git@codeberg.org/deanqx/homelab-kubernetes.git \
-  --branch=main \
-  --private-key-file=/tmp/flux_ssh \
-  --path=clusters/production
+kubectl apply -f clusters/production/flux-system/gotk-components.yaml
+```
+
+Add SSH key and known hosts as secret.
+
+```zsh
+ssh-keyscan codeberg.org > /tmp/flux_known_hosts
+```
+
+```zsh
+kubectl create secret generic flux-system \
+  --namespace=flux-system \
+  --from-file=identity=/tmp/flux_ssh \
+  --from-file=known_hosts=/tmp/flux_known_hosts
+```
+
+Update the specified repository URL in `gotk-sync.yaml`, then apply it.
+
+```zsh
+kubectl apply -f clusters/production/flux-system/gotk-sync.yaml
 ```
 
 ## 3 Generate encryption key for secrets
@@ -108,6 +123,12 @@ git commit -m 'ops: add public key for secrets generation'
 
 Secrets can now be created following the
 [create secrets section](#1-create-secrets).
+
+## 4 Verify working installation
+
+```zsh
+flux get kustomizations
+```
 
 Developing
 ==========
