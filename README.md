@@ -74,69 +74,40 @@ flux bootstrap git \
 ## 3 Generate encryption key for secrets
 
 ```zsh
-sudo pacman --needed -S gnupg sops
+sudo pacman --needed -S age sops
 ```
-
-Generate GPG RSA key pair without password.
 
 ```zsh
-export KEY_NAME="homelab"
-export KEY_COMMENT="flux secrets"
-
-gpg --batch --full-generate-key <<EOF
-%no-protection
-Key-Type: 1
-Key-Length: 4096
-Subkey-Type: 1
-Subkey-Length: 4096
-Expire-Date: 0
-Name-Comment: ${KEY_COMMENT}
-Name-Real: ${KEY_NAME}
-EOF
-```
-
-The output shows the footprint of the new key.
-
-```
-gpg: revocation certificate stored as
-'~/.gnupg/openpgp-revocs.d/E583935F5865EDC23D5181A91E3CEBDDA65179A0.rev'
-```
-
-The footprint isn't secret and it's no problem for it to show up in your shell
-history.
-
-```zsh
-export KEY_FP=E583935F5865EDC23D5181A91E3CEBDDA65179A0
-```
-
-Create the `sops-gpg` secret in Kubernetes which contains the private key.
-
-```zsh
-gpg --export-secret-keys --armor "${KEY_FP}" |
-kubectl create secret generic sops-gpg \
+age-keygen | kubectl create secret generic sops-age \
 --namespace=flux-system \
---from-file=sops.asc=/dev/stdin
+--from-file=age.agekey=/dev/stdin
 ```
 
-Store the public key in the Git repository so the DevOps team can encrypt
-secrets. They can't decrypt them with the public key.
+Example output:
 
-```zsh
-gpg --export --armor "${KEY_FP}" > ./clusters/production/.sops.pub.asc
+```
+Public key: age1x282vrqywk5nt9t9s8rpe3dcp3p7k76kay47tw9v4yt653dca99qgddhdn
 ```
 
-Commit the public key
+Update the public key value `creation_rules.age` in the config for the
+`sops` CLI located at `.sops.yaml`.
+
+```yaml
+creation_rules:
+  - path_regex: ...
+    encrypted_regex: ...
+    age: age1x282vrqywk5nt9t9s8rpe3dcp3p7k76kay47tw9v4yt653dca99qgddhdn
+```
+
+Commit the `sops` config containing the public key:
 
 ```zsh
-git add ./clusters/production/.sops.pub.asc
+git add ./clusters/production/.sops.yaml
 git commit -m 'ops: add public key for secrets generation'
 ```
 
-You can now delete the private key from your personal computer.
-
-```zsh
-gpg --delete-secret-keys "${KEY_FP}"
-```
+Secrets can now be created following the
+[create secrets section](#1-create-secrets).
 
 Developing
 ==========
@@ -144,7 +115,34 @@ Developing
 ## 1 Create secrets
 
 ```zsh
-gpg --import ./clusters/production/.sops.pub.asc
+sudo pacman --needed -S openssl age sops
+```
+
+In this example a database password with a length of 16 characters
+is generated and encrypted.
+
+```zsh
+kubectl -n default create secret generic postgresql \
+--namespace=nextcloud \
+--from-literal=password=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 16) \
+--dry-run=client \
+-o yaml > apps/production/secrets/nextcloud-postgresql.yaml
+```
+
+Encrypt the created secrets using the `sops` CLI.
+
+```zsh
+sops --encrypt --in-place apps/production/secrets/nextcloud-postgresql.yaml
+```
+
+Update `apps/production/kustomization.yaml` to include the new secrets.
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ...
+  - secrets/nextcloud-postgresql.yaml
 ```
 
 ## 2 Check changes
