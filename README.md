@@ -219,6 +219,12 @@ Kustomization files. To verify that Flux applied the latest git commit:
 flux get kustomizations
 ```
 
+Alternatively you can check all Flux resources with:
+
+```zsh
+flux get all -A
+```
+
 Check if Helm was successful.
 
 ```zsh
