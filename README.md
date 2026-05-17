@@ -139,21 +139,21 @@ Developing
 sudo pacman --needed -S openssl age sops
 ```
 
-In this example a database password with a length of 16 characters
+In this example a password for Redis with a length of 16 characters
 is generated and encrypted.
 
 ```zsh
-kubectl -n default create secret generic postgresql \
+kubectl -n default create secret generic redis \
 --namespace=nextcloud \
---from-literal=password=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 16) \
+--from-literal=redis-password=$(openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 16) \
 --dry-run=client \
--o yaml > apps/production/secrets/nextcloud-postgresql.yaml
+-o yaml > apps/production/secrets/nextcloud-redis.yaml
 ```
 
 Encrypt the created secrets using the `sops` CLI.
 
 ```zsh
-sops --encrypt --in-place apps/production/secrets/nextcloud-postgresql.yaml
+sops --encrypt --in-place apps/production/secrets/nextcloud-redis.yaml
 ```
 
 Update `apps/production/kustomization.yaml` to include the new secrets.
