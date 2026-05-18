@@ -16,7 +16,7 @@ spec:
         from: Same
   - name: https
     protocol: HTTPS
-    port: 443
+    port: 8443
     tls:
       mode: Terminate
       certificateRefs:
