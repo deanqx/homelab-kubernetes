@@ -2,7 +2,7 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: postgresql
-  namespace: nextcloud
+  namespace: flux-system
 spec:
   ref:
     # https://hub.docker.com/r/bitnamicharts/postgresql/tags
@@ -12,7 +12,7 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: redis
-  namespace: nextcloud
+  namespace: flux-system
 spec:
   ref:
     # https://hub.docker.com/r/bitnamicharts/redis/tags
