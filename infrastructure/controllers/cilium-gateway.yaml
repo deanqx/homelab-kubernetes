@@ -39,6 +39,8 @@ spec:
   values:
     gatewayAPI:
       enabled: true
+      hostNetwork:
+        enabled: true
       gatewayClass:
         create: "true"
     operator:
