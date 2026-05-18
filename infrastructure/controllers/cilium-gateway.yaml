@@ -25,11 +25,13 @@ metadata:
 spec:
   interval: 12h
   install:
-    strategy:
-      name: RetryOnFailure
+    remediation:
+      retries: 3
   upgrade:
-    strategy:
-      name: RetryOnFailure
+    remediation:
+      retries: 3
+      # Automatically rollback on failure
+      remediateLastFailure: true
   chartRef:
     kind: OCIRepository
     name: cilium
