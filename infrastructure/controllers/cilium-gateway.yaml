@@ -39,3 +39,7 @@ spec:
   values:
     gatewayAPI:
       enabled: true
+      gatewayClass:
+        create: "true"
+    operator:
+      replicas: 1
