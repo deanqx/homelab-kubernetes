@@ -232,13 +232,6 @@ Check if Helm was successful.
 flux get helmreleases -A
 ```
 
-If Helm failed too many times, it goes into a timeout state. You can restart
-the installation of a app with:
-
-```zsh
-kubectl -n flux-system rollout restart deploy helm-controller
-```
-
 OCI is sometimes used for Helm. You can check if the OCIRepository isn't loaded.
 
 ```zsh
