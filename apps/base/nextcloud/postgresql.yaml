@@ -2,7 +2,7 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: postgresql
-  namespace: flux-system
+  namespace: nextcloud
 spec:
   interval: 24h
   url: oci://registry-1.docker.io/bitnamicharts/postgresql
@@ -28,7 +28,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: postgresql
-    namespace: flux-system
+    namespace: nextcloud
   values:
     # Reference: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/README.md
     global:
