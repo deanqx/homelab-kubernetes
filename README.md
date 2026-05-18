@@ -13,6 +13,8 @@ From there it uses Kustomization files to find the manifests.
 Overview
 ========
 
+- Cilium
+- Longhorn
 - Mozilla SOPS is used to encrypt secrets like database passwords.
 
 Installation
