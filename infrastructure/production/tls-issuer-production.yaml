@@ -3,6 +3,7 @@ kind: ClusterIssuer
 metadata:
   name: tls-issuer-production
 spec:
+  # Reference: https://cert-manager.io/docs/configuration/acme/http01/
   acme:
     # server: https://acme-v02.api.letsencrypt.org/directory
     server: https://acme-staging-v02.api.letsencrypt.org/directory
@@ -13,6 +14,6 @@ spec:
     - http01:
         gatewayHTTPRoute:
           parentRefs:
-            - name: cilium-gateway
+            - name: cilium
               namespace: cilium-gateway-system
               kind: Gateway

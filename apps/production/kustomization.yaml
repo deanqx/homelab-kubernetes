@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - secrets/nextcloud-postgresql.yaml
   - secrets/nextcloud-redis.yaml
+  - nextcloud-route.yaml
   - ../base/nextcloud
 patches:
   - path: nextcloud-versions.yaml
