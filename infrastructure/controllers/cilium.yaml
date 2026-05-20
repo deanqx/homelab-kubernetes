@@ -36,6 +36,8 @@ spec:
       name: default
     gatewayAPI:
       enabled: true
+    l2announcements:
+      enabled: true
     k8sServiceHost: dean-homelab
     k8sServicePort: 6443
     kubeProxyReplacement: true
