@@ -9,8 +9,7 @@ metadata:
   name: cilium
   namespace: cilium-gateway-system
   annotations:
-    cert-manager.io/cluster-issuer: tls-issuer-production
-    io.cilium/lb-ipam-ips: "10.101.2.6"
+    cert-manager.io/cluster-issuer: tls-issuer
 spec:
   # Reference: https://cert-manager.io/docs/configuration/acme/http01/
   gatewayClassName: cilium
@@ -18,16 +17,19 @@ spec:
   - name: http
     protocol: HTTP
     port: 80
+    hostname: "*.kowi.it"
     allowedRoutes:
       namespaces:
         from: All
   - name: https
     protocol: HTTPS
     port: 443
+    hostname: cloud.kowi.it
     tls:
       mode: Terminate
       certificateRefs:
-      - name: cilium-gateway-tls-production
+      - kind: Secret
+        name: cloud-kowi-it
     allowedRoutes:
       namespaces:
         from: All

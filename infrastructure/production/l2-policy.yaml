@@ -1,0 +1,22 @@
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: entry-node-pool
+  namespace: kube-system
+spec:
+  blocks:
+    - start: "10.101.2.5"
+      stop: "10.101.2.5"
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: entry-node-l2-policy
+  namespace: kube-system
+spec:
+  nodeSelector:
+    matchLabels:
+      network.role: "entry"
+  interfaces:
+    - "^enp1s0$"
+  loadBalancerIPs: true

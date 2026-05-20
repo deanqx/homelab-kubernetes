@@ -102,7 +102,15 @@ tunnelProtocol: vxlan
 ```
 
 ```zsh
-cilium-cli install --helm-set gatewayAPI.enabled=true
+cilium-cli install \
+--helm-set gatewayAPI.enabled=true \
+--helm-set l2announcements.enabled=true \
+--helm-set kubeProxyReplacement.enabled=true
+```
+
+Wait for Cilium to be ready:
+
+```zsh
 cilium-cli status --wait
 ```
 
