@@ -28,28 +28,46 @@ Install the required CLI tools on your personal system:
 sudo pacman --needed -S kubectl helm flux cilium-cli sops age pwgen
 ```
 
-## 1 K3s Setup
+## 1 Firewall
+
+Cilium is used as firewall for the host system and services like SSH on port 22
+are automatically detected.
+
 
 Open port `6443` and `10250` in the host firewall
 ([See Kubernetes Ports](https://kubernetes.io/docs/reference/networking/ports-and-protocols/)).
 
-SSH into your server and configure K3s. In this case in form of a
-NixOS configuration, important are the `extraFlags`.
+## 2 K3s Setup
 
-```nix
-services.k3s = {
-  enable = true;
-  role = "server";
-  extraFlags = [ # installing manually
-    "--flannel-backend=none"
-    "--disable=traefik"
-    "--disable=servicelb"
-    "--disable=network-policy"
-    "--disable=kube-proxy"
-    "--disable=helm"
-  ];
-};
+SSH into your server and install K3s.
+
+```zsh
+curl -sfL https://get.k3s.io | sh -s - server \
+  --cluster-init \
+  --flannel-backend=none \
+  --disable-kube-proxy \
+  --disable-network-policy \
+  --disable=traefik \
+  --disable=servicelb
 ```
+
+- `--cluster-init`: Tells K3s to initialize an internal, embedded etcd database
+  on this first node. This allows you to easily join more master nodes later to
+  form a High-Availability (HA) cluster without setting up an external database.
+
+- `--disable-kube-proxy` and `--flannel-backend=none`: Disables kube-proxy and
+  Flannel, the default K3s network provider (CNI). This leaves the cluster's
+networking completely blank, so Cilium can take it over.
+
+- `--disable-network-policy`: Turns off K3s's built-in network policy agent.
+  Since that default agent relies on Flannel and kube-proxy, keeping it on
+  would cause errors. Cilium will handle your network policies natively.
+  The iptables now only contain Kubelet rules.
+
+- `--disable=traefik`: Traefik Ingress controller is replaced with Cilium Envoy.
+
+- `--disable=servicelb`: Disable built-in LoadBalancer controller (Klipper LB).
+  Cilium will be used instead.
 
 After deploying the config, copy the kubeconfig to your local machine.
 
@@ -60,6 +78,8 @@ sudo cp /etc/rancher/k3s/k3s.yaml ~
 sudo chown $(whoami):users ~/k3s.yaml
 ```
 
+Delete `~/k3s.yaml` after completing the next step.
+
 **On your local machine:**
 
 ```zsh
@@ -67,51 +87,96 @@ scp <SERVER>:k3s.yaml ~/.kube/config
 sed -i 's/127.0.0.1/<SERVER_HOSTNAME>/' ~/.kube/config
 ```
 
-Verify connection to Kubernetes:
+Verify connection to Kubernetes.
+
+**Note:** Because there is no CNI installed yet, your nodes will show as
+NotReady if you run kubectl get nodes. This is completely normal and
+will be fixed as soon as Cilium is installed.
 
 ```zsh
 kubectl get nodes
 ```
 
-## 2 Cilium Installation
+## 3 Cilium Installation
 
 Cilium is the networking, security, and observability engine for this
 Kubernetes cluster.
 
 **Warning:** Make sure to disable `checkReversePath` in your Firewall.
 
-Verify your Helm values, install Cilium with Gateway API enabled, and wait
-for deployment:
+Because this Guide uses the new Gateway API of Kubernetes we need to install
+the necessary CRDs (Custom Resource Definitions).
+The following example uses version `1.5.1`, you can find the latest here
+[latest](https://github.com/kubernetes-sigs/gateway-api/releases).
+Cilium requires the Experimental CRDs
 
 ```zsh
-cilium-cli install --dry-run-helm-values
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/experimental-install.yaml
 ```
 
-Example output:
-
-```
-cluster:
-  name: default
-k8sServiceHost: dean-homelab
-k8sServicePort: 6443
-kubeProxyReplacement: true
-operator:
-  replicas: 1
-routingMode: tunnel
-tunnelProtocol: vxlan
-```
+Now Cilium is getting installed.
+Modify `--version` to the [latest](https://github.com/cilium/cilium/releases).
 
 ```zsh
-cilium-cli install \
---helm-set gatewayAPI.enabled=true \
---helm-set l2announcements.enabled=true \
---helm-set kubeProxyReplacement.enabled=true
+cilium-cli install --version 1.19.4 \
+  --set gatewayAPI.enabled=true \
+  --set hostFirewall.enabled=true \
+  --set l2announcements.enabled=true \
+  --set bpf.masquerade=true \
+  --set kubeProxyReplacement=true \
+  --set ipam.operator.clusterPoolIPv4PodCIDRList="{10.42.0.0/16}" \
+  --set k8sClientRateLimit.qps=20 \
+  --set k8sClientRateLimit.burst=40
 ```
 
-Wait for Cilium to be ready:
+- `l2announcements.enabled=true`: Enables the Layer 2 Layer Load Balancer
+  feature, allowing Cilium to respond to ARP requests and host Virtual IPs
+  on your local network.
+
+- `hostFirewall.enabled=true`: Use Cilium as host firewall.
+
+- `bpf.masquerade=true`: Enable native IP masquerade support in eBPF.
+
+- `kubeProxyReplacement=true`: Tells Cilium to fully replace kube-proxy using
+  high-performance eBPF routing instead of legacy iptables.
+
+- `ipam.operator.clusterPoolIPv4PodCIDRList="{10.42.0.0/16}"`:
+  Sets the IP address range assigned to Pods, precisely matching k3s's
+  default internal network.
+
+- `k8sClientRateLimit.qps=20 & --set k8sClientRateLimit.burst=40`:
+  Increases how fast Cilium is allowed to talk to the Kubernetes API.
+  This prevents Cilium from being throttled due to the high volume of
+  rapid lease updates required by L2 announcements.
+
+### Validate the Installation
+
+To validate that Cilium has been properly installed, you can run:
 
 ```zsh
 cilium-cli status --wait
+```
+
+All Pods should now be ready (like `coredns` and `metrics-server`):
+
+```zsh
+kubectl -n kube-system get pod
+```
+
+
+Run the following command to validate that your cluster has proper network
+connectivity:
+
+```zsh
+cilium-cli connectivity test
+```
+
+To prevent future problems make sure that all tests pass. If some tests fail
+try turning off (= 0) reverse path filtering on the server:
+
+```zsh
+sysctl net.ipv4.conf.all.rp_filter
+sysctl net.ipv4.conf.default.rp_filter
 ```
 
 ### GitOps Sync
@@ -128,7 +193,7 @@ Update `infrastructure/controllers/cilium.yaml` with the correct
 `OCIRepository.spec.ref.semver` and `HelmRelease.spec.values`
 based on the output above.
 
-## 3 FluxCD Deployment
+## 4 FluxCD Deployment
 
 ### Generate Deployment Keys
 
@@ -171,6 +236,7 @@ kubectl create secret generic flux-system \
 
 ```zsh
 kubectl apply -f clusters/production/flux-system/gotk-components.yaml
+kubectl apply -f clusters/production/flux-network-policy.yaml
 ```
 
 Check if Pods are ready:
@@ -191,7 +257,7 @@ Check if installation was successful (all except `apps` should be ready):
 flux get kustomization
 ```
 
-## 4 Generate encryption key for secrets
+## 5 Generate encryption key for secrets
 
 ```zsh
 age-keygen | kubectl create secret generic sops-age \
@@ -225,7 +291,7 @@ git commit -m 'ops: add public key for secrets generation'
 Secrets can now be created following the
 [create secrets section](#create-secrets).
 
-## 5 Longhorn storage
+## 6 Longhorn storage
 
 ### Installation
 
@@ -243,7 +309,7 @@ sudo -E ./longhornctl install preflight
 sudo -E ./longhornctl check preflight
 ```
 
-## 6 Verify working installation
+## 7 Verify working installation
 
 All Kustomizations should be ready now.
 
