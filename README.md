@@ -97,12 +97,12 @@ will be fixed as soon as Cilium is installed.
 kubectl get nodes
 ```
 
-## 3 Cilium Installation
+## 3 Cilium Deployment
 
 Cilium is the networking, security, and observability engine for this
 Kubernetes cluster.
 
-**Warning:** Make sure to disable `checkReversePath` in your Firewall.
+### Gateway API Installation
 
 Because this Guide uses the new Gateway API of Kubernetes we need to install
 the necessary CRDs (Custom Resource Definitions).
@@ -114,8 +114,9 @@ Cilium requires the Experimental CRDs
 kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/experimental-install.yaml
 ```
 
-Now Cilium is getting installed.
-Modify `--version` to the [latest](https://github.com/cilium/cilium/releases).
+### Cilium Installation
+
+Optionally modify `--version` to the [latest](https://github.com/cilium/cilium/releases).
 
 ```zsh
 cilium-cli install --version 1.19.4 \
@@ -163,7 +164,6 @@ All Pods should now be ready (like `coredns` and `metrics-server`):
 kubectl -n kube-system get pod
 ```
 
-
 Run the following command to validate that your cluster has proper network
 connectivity:
 
@@ -181,6 +181,9 @@ sysctl net.ipv4.conf.default.rp_filter
 
 ### GitOps Sync
 
+In the next step Flux will be installed and to make Flux manage the Cilium
+installation the configuration in the Git repository has to match.
+
 Ensure the Cilium version and Helm values in your Git repo match your live
 cluster:
 
@@ -192,6 +195,12 @@ helm get values cilium -n kube-system -o yaml
 Update `infrastructure/controllers/cilium.yaml` with the correct
 `OCIRepository.spec.ref.semver` and `HelmRelease.spec.values`
 based on the output above.
+
+Furthermore, the Gateway API CRDs version should also be adjusted in
+`clusters/production/infrastructure.yaml`, version `1.5.1`
+was used in this guide.
+
+Before continuing push the updated `cilium.yaml` to Git.
 
 ## 4 FluxCD Deployment
 
@@ -216,12 +225,12 @@ Give read permissions of public key (`/tmp/flux_ssh.pub`) to Git repository.
 cat /tmp/flux_ssh.pub
 ```
 
-### Prepare Flux Secrets
+### Set Flux Credentials
 
 Add SSH key and known hosts as secret.
 
 ```zsh
-ssh-keyscan codeberg.org > /tmp/flux_known_hosts
+ssh-keyscan -T 240 codeberg.org | tee /tmp/flux_known_hosts
 ```
 
 ```zsh
@@ -236,7 +245,6 @@ kubectl create secret generic flux-system \
 
 ```zsh
 kubectl apply -f clusters/production/flux-system/gotk-components.yaml
-kubectl apply -f clusters/production/flux-network-policy.yaml
 ```
 
 Check if Pods are ready:
@@ -251,9 +259,10 @@ Update the specified repository URL in `gotk-sync.yaml`, then apply it:
 kubectl apply -f clusters/production/flux-system/gotk-sync.yaml
 ```
 
-Check if installation was successful (all except `apps` should be ready):
+Check if installation was successful (all Kustomizations except `apps` should be ready):
 
 ```zsh
+flux get source git
 flux get kustomization
 ```
 
@@ -284,7 +293,7 @@ creation_rules:
 Commit the `sops` config containing the public key:
 
 ```zsh
-git add ./clusters/production/.sops.yaml
+git add .sops.yaml
 git commit -m 'ops: add public key for secrets generation'
 ```
 
