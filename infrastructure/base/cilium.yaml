@@ -48,6 +48,7 @@ spec:
     k8sServiceHost: dean-homelab
     k8sServicePort: 6443
     kubeProxyReplacement: true
+    devices: "{enp1s0}"
     l2announcements:
       enabled: true
     operator:

@@ -3,4 +3,6 @@ kind: Kustomization
 resources:
   - cilium.yaml
   - cert-manager.yaml
+  - gateway.yaml
   - longhorn.yaml
+  - longhorn-storageclass.yaml
