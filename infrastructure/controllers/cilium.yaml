@@ -10,7 +10,7 @@ spec:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
     operation: copy
   ref:
-    semver: "1.19.1"
+    semver: "1.19.4"
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -32,15 +32,26 @@ spec:
     name: cilium
     namespace: kube-system
   values:
+    bpf:
+      masquerade: true
     cluster:
       name: default
     gatewayAPI:
       enabled: true
-    l2announcements:
+    hostFirewall:
       enabled: true
+    ipam:
+      operator:
+        clusterPoolIPv4PodCIDRList:
+        - 10.42.0.0/16
+    k8sClientRateLimit:
+      burst: 40
+      qps: 20
     k8sServiceHost: dean-homelab
     k8sServicePort: 6443
     kubeProxyReplacement: true
+    l2announcements:
+      enabled: true
     operator:
       replicas: 1
     routingMode: tunnel
