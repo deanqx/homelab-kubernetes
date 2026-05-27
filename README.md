@@ -33,7 +33,6 @@ sudo pacman --needed -S kubectl helm flux cilium-cli sops age pwgen
 Cilium is used as firewall for the host system and services like SSH on port 22
 are automatically detected.
 
-
 Open port `6443` and `10250` in the host firewall
 ([See Kubernetes Ports](https://kubernetes.io/docs/reference/networking/ports-and-protocols/)).
 
@@ -120,6 +119,7 @@ Optionally modify `--version` to the [latest](https://github.com/cilium/cilium/r
 
 ```zsh
 cilium-cli install --version 1.19.4 \
+  --set devices=enp1s0 \
   --set gatewayAPI.enabled=true \
   --set hostFirewall.enabled=true \
   --set l2announcements.enabled=true \
@@ -129,6 +129,8 @@ cilium-cli install --version 1.19.4 \
   --set k8sClientRateLimit.qps=20 \
   --set k8sClientRateLimit.burst=40
 ```
+
+- `devices=enp1s0`: Adjust this to your internet hardware interface.
 
 - `l2announcements.enabled=true`: Enables the Layer 2 Layer Load Balancer
   feature, allowing Cilium to respond to ARP requests and host Virtual IPs
