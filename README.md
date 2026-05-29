@@ -1,3 +1,24 @@
+Overview
+========
+
+## Technologies
+
+- Kubernetes (k3s): compliant lightweight version of Kubernetes which is used
+  to orchestrate the cluster.
+
+- Cilium: CNI (Container Network Interface), completely replaces the host
+  firewall and kube-proxy
+
+- Flux CD: GitOps tool for Kubernetes
+
+- Mozilla SOPS: encrypts secrets
+
+- Longhorn: storage over multiple nodes
+
+- Databases: like PostgreSQL or Redis
+
+## Getting started
+
 GitOps is a practice where a Git repository acts as the single source of truth
 for your infrastructure, automatically syncing and self-healing your live
 system to match whatever code is merged into Git.
@@ -10,12 +31,26 @@ The example repo was used as reference:
 The entry point for FluxCD is `clusters/production`.
 From there it uses Kustomization files to find the manifests.
 
-Overview
-========
+This cluster has 3 nodes in 3 locations, to provide data integrity at all times.
 
-- Cilium
-- Longhorn
-- Mozilla SOPS is used to encrypt secrets like database passwords.
+## Deployed in Cluster
+
+### Nextcloud
+
+[Nextcloud](https://nextcloud.com) is self-hosted replacement for personal cloud
+providers like Google Drive or Microsoft OneDrive. It offers many apps
+implemented in the web interface which can replace Microsoft apps
+like Word and Teams.
+
+- Entry: Cilium is used as reverse-proxy and Cert-Manager for https.
+- Storage: Longhorn
+- Database: PostgreSQL
+- Cache: Redis
+
+### External
+
+- [Home Assistant](https://www.home-assistant.io/): Controls my smart home
+  devices. Cilium is used as reverse-proxy and Cert-Manager for https.
 
 Installation
 ============
