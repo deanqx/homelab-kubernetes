@@ -4,18 +4,6 @@ metadata:
   name: home-assistant
 ---
 apiVersion: v1
-kind: Service
-metadata:
-  name: home-assistant
-  namespace: home-assistant
-spec:
-  ports:
-    - name: http
-      protocol: TCP
-      port: 80
-      targetPort: 8123
----
-apiVersion: v1
 kind: Endpoints
 metadata:
   name: home-assistant
@@ -27,6 +15,18 @@ subsets:
       - name: http
         port: 8123
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8123
+      targetPort: 8123
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -35,7 +35,8 @@ metadata:
 spec:
   parentRefs:
     - name: cilium-gateway
-      namespace: kube-system
+      namespace: gateway-system
+      sectionName: https
   hostnames:
     - "home.kowi.it"
   rules:
@@ -46,4 +47,4 @@ spec:
       backendRefs:
         - name: home-assistant
           kind: Service
-          port: 80
+          port: 8123

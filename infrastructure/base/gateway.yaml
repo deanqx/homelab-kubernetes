@@ -2,7 +2,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: cilium-gateway
-  namespace: kube-system
+  namespace: gateway-system
 spec:
   gatewayClassName: cilium
   listeners:
@@ -12,3 +12,33 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    # ref: https://gateway-api.sigs.k8s.io/guides/user-guides/tls/
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+        - kind: Secret
+          name: multi-tls-secret
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-to-https-redirect
+  namespace: gateway-system
+spec:
+  # ref: https://gateway-api.sigs.k8s.io/guides/user-guides/http-redirect-rewrite/
+  parentRefs:
+  - name: cilium-gateway
+    namespace: gateway-system
+    sectionName: http
+  rules:
+  - filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
