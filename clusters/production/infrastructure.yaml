@@ -19,7 +19,7 @@ spec:
   interval: 1h
   retryInterval: 2m
   timeout: 5m
-  prune: false
+  prune: true
   wait: true
   sourceRef:
     kind: GitRepository
@@ -38,7 +38,10 @@ spec:
   interval: 1h
   retryInterval: 2m
   timeout: 5m
-  prune: false
+  # The most damage pruning could do here is deleting
+  # TLS certificates but the database data is protected
+  # by a PVC and is located in ./apps.
+  prune: true
   wait: true
   sourceRef:
     kind: GitRepository

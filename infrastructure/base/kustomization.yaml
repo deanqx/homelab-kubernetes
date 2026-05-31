@@ -4,5 +4,6 @@ resources:
   - cilium.yaml
   - cert-manager.yaml
   - gateway.yaml
+  - tls-issuer.yaml
   - longhorn.yaml
   - longhorn-storageclass.yaml

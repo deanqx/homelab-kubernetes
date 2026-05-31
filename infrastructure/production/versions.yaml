@@ -11,7 +11,7 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: cert-manager
-  namespace: cert-manager
+  namespace: gateway-system
 spec:
   ref:
     semver: "1.20.2"

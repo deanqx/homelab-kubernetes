@@ -2,18 +2,34 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: tls-issuer
+  namespace: gateway-system
 spec:
   # Reference: https://cert-manager.io/docs/configuration/acme/http01/
   acme:
-    # server: https://acme-v02.api.letsencrypt.org/directory
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: dean@kowatsch.de
+    # Because of limit from Let's Encrypt how many certificates
+    # can be created in a certain time, use this for testing:
+    # server: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: 110404616+deanqx@users.noreply.github.com
     privateKeySecretRef:
       name: tls-account-key
     solvers:
     - http01:
         gatewayHTTPRoute:
           parentRefs:
-            - name: cilium
-              namespace: cilium-gateway-system
+            - name: cilium-gateway
+              namespace: gateway-system
               kind: Gateway
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kowi-it-cert
+  namespace: gateway-system
+spec:
+  secretName: multi-tls-secret
+  issuerRef:
+    name: tls-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - home.kowi.it
