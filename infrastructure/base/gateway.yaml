@@ -1,29 +1,45 @@
+# ref: https://cert-manager.io/docs/usage/gateway/
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: cilium-gateway
   namespace: gateway-system
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
 spec:
   gatewayClassName: cilium
   listeners:
+    # required for TLS certificate request
     - name: http
       protocol: HTTP
       port: 80
       allowedRoutes:
-        namespaces:
-          from: All
-    # ref: https://gateway-api.sigs.k8s.io/guides/user-guides/tls/
-    - name: https
-      protocol: HTTPS
+          namespaces:
+            from: All
+    - name: https-home-assistant
+      hostname: home.kowi.it
       port: 443
+      protocol: HTTPS
       allowedRoutes:
         namespaces:
           from: All
       tls:
         mode: Terminate
         certificateRefs:
-        - kind: Secret
-          name: multi-tls-secret
+        - name: home-kowi-it-tls
+          kind: Secret
+    - name: https-nextcloud
+      hostname: cloud.kowi.it
+      port: 443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+        - name: cloud-kowi-it-tls
+          kind: Secret
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute

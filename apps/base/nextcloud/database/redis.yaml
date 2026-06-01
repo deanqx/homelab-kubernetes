@@ -36,7 +36,7 @@ spec:
       existingSecret: "redis"
       existingSecretPasswordKey: "redis-password"
     master:
-      persistance:
+      persistence:
         enabled: false
       nodeSelector:
         # In case of an outtage of this node, change it to the secondary node name

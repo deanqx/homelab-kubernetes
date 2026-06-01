@@ -36,7 +36,7 @@ spec:
   parentRefs:
     - name: cilium-gateway
       namespace: gateway-system
-      sectionName: https
+      sectionName: https-home-assistant
   hostnames:
     - "home.kowi.it"
   rules:

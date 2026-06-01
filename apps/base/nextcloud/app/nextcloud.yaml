@@ -1,0 +1,92 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  interval: 24h
+  url: https://nextcloud.github.io/helm/
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  interval: 12h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+      # Automatically rollback on failure
+      remediateLastFailure: true
+  chart:
+    spec:
+      chart: nextcloud
+      sourceRef:
+        kind: HelmRepository
+        name: nextcloud
+        namespace: nextcloud
+  values:
+    startupProbe:
+      # add delay before first probe so pod has time to start
+      enabled: true
+    service:
+      type: ClusterIP
+      port: 8080
+    nextcloud:
+      host: cloud.kowi.it
+      username: admin
+      password: changeme4321
+      configs:
+        proxies.config.php: |-
+          <?php
+          $CONFIG = array (
+            'trusted_proxies' => [ '10.142.0.0/24' ],
+            'overwritehost' => 'cloud.kowi.it',
+            'overwriteprotocol' => 'https',
+            'overwritewebroot' => '/',
+            'overwrite.cli.url' => 'https://cloud.kowi.it',
+          );
+        maintenance.config.php: |-
+          <?php
+          $CONFIG = array (
+            'maintenance_window_start' => 4,
+          );
+    internalDatabase:
+      enabled: false
+    externalDatabase:
+      enabled: true
+      type: postgresql
+      host: postgresql.nextcloud.svc.cluster.local
+      database: nextcloud
+      existingSecret:
+        enabled: true
+        secretName: postgresql
+        # The username has to be in the secret
+        # because of bad design of the chart.
+        # username=nextcloud
+        usernameKey: username
+        passwordKey: user-password
+    externalRedis:
+      enabled: true
+      host: redis-master.nextcloud.svc.cluster.local
+      existingSecret:
+        enabled: true
+        secretName: redis
+        passwordKey: redis-password
+    cronjob:
+      enabled: true
+      type: cronjob # create new pod for job
+      cronjob:
+        securityContext:
+          runAsUser: 33
+          runAsGroup: 33
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+    persistence:
+      enabled: true
+      storageClass: longhorn-2node
+      size: 100Gi
