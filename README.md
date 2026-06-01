@@ -374,28 +374,29 @@ is generated and encrypted.
 ```bash
 kubectl -n default create secret generic postgresql \
 --namespace=nextcloud \
+--from-literal=username=nextcloud \
 --from-literal=admin-password=$(pwgen -sBcn 20 1) \
 --from-literal=user-password=$(pwgen -sBcn 20 1) \
 --from-literal=replication-password=$(pwgen -sBcn 20 1) \
 --from-literal=metrics-password=$(pwgen -sBcn 20 1) \
 --dry-run=client \
--o yaml > apps/production/secrets/nextcloud-postgresql.yaml
+-o yaml > apps/production/nextcloud/database/postgresql-secret.yaml
 ```
 
 Encrypt the created secrets using the `sops` CLI.
 
 ```bash
-sops --encrypt --in-place apps/production/secrets/nextcloud-postgresql.yaml
+sops --encrypt --in-place apps/production/nextcloud/database/postgresql-secret.yaml
 ```
 
-Update `apps/production/kustomization.yaml` to include the new secrets.
-Make sure to add the secret before the HelmRelease.
+Update `apps/production/nextcloud/database/kustomization.yaml` to include the
+new secrets. Make sure to add the secret before the HelmRelease.
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - secrets/nextcloud-postgresql.yaml
+  - postgresql-secret.yaml
   - ...
 ```
 
@@ -470,4 +471,22 @@ You can restart the installation of a Chart with:
 
 ```bash
 kubectl -n flux-system rollout restart deploy helm-controller
+```
+
+## Longhorn Storage
+
+When deployments are deleted and created again they often leave claimed volumes
+behind.
+
+The following command should only return the volumes that are used. It also
+gives helpful information about the health of the volumes.
+
+```bash
+kubectl -n longhorn-system get volume
+```
+
+If not, delete them carefully:
+
+```bash
+kubectl -n longhorn-system delete volume pvc-...
 ```
