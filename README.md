@@ -418,6 +418,19 @@ git commit -m "feat: ..."
 git push
 ```
 
+## Run Integration Tests
+
+After changes are applied run the integration tests.
+
+```zsh
+flux get kustomization
+```
+
+```zsh
+sudo docker build -t homelab-tests tests
+sudo docker run -it --rm homelab-tests
+```
+
 Troubleshooting
 ===============
 
