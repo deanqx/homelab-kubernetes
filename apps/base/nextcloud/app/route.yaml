@@ -11,10 +11,16 @@ spec:
   hostnames:
   - "cloud.kowi.it"
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /
-    backendRefs:
-    - name: nextcloud
-      port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            add:
+              - name: Strict-Transport-Security
+                value: "max-age=15552000"
+      backendRefs:
+        - name: nextcloud
+          port: 8080
