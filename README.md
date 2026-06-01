@@ -428,8 +428,8 @@ flux get kustomization
 ```
 
 ```bash
-sudo docker build -t homelab-tests tests
-sudo docker run -it --rm homelab-tests
+docker build -t homelab-tests tests
+docker run --rm homelab-tests
 ```
 
 Troubleshooting
