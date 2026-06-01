@@ -59,7 +59,7 @@ Installation
 
 Install the required CLI tools on your personal system:
 
-```zsh
+```bash
 sudo pacman --needed -S kubectl helm flux cilium-cli sops age pwgen
 ```
 
@@ -75,7 +75,7 @@ Open port `6443` and `10250` in the host firewall
 
 SSH into your server and install K3s.
 
-```zsh
+```bash
 curl -sfL https://get.k3s.io | sh -s - server \
   --cluster-init \
   --flannel-backend=none \
@@ -107,7 +107,7 @@ After deploying the config, copy the kubeconfig to your local machine.
 
 **On the server:**
 
-```zsh
+```bash
 sudo cp /etc/rancher/k3s/k3s.yaml ~
 sudo chown $(whoami):users ~/k3s.yaml
 ```
@@ -116,7 +116,7 @@ Delete `~/k3s.yaml` after completing the next step.
 
 **On your local machine:**
 
-```zsh
+```bash
 scp <SERVER>:k3s.yaml ~/.kube/config
 sed -i 's/127.0.0.1/<SERVER_HOSTNAME>/' ~/.kube/config
 ```
@@ -127,7 +127,7 @@ Verify connection to Kubernetes.
 NotReady if you run kubectl get nodes. This is completely normal and
 will be fixed as soon as Cilium is installed.
 
-```zsh
+```bash
 kubectl get nodes
 ```
 
@@ -144,7 +144,7 @@ The following example uses version `1.5.1`, you can find the latest here
 [latest](https://github.com/kubernetes-sigs/gateway-api/releases).
 Cilium requires the Experimental CRDs
 
-```zsh
+```bash
 kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/experimental-install.yaml
 ```
 
@@ -152,7 +152,7 @@ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/re
 
 Optionally modify `--version` to the [latest](https://github.com/cilium/cilium/releases).
 
-```zsh
+```bash
 cilium-cli install --version 1.19.4 \
   --set devices=enp1s0 \
   --set gatewayAPI.enabled=true \
@@ -191,27 +191,27 @@ cilium-cli install --version 1.19.4 \
 
 To validate that Cilium has been properly installed, you can run:
 
-```zsh
+```bash
 cilium-cli status --wait
 ```
 
 All Pods should now be ready (like `coredns` and `metrics-server`):
 
-```zsh
+```bash
 kubectl -n kube-system get pod
 ```
 
 Run the following command to validate that your cluster has proper network
 connectivity:
 
-```zsh
+```bash
 cilium-cli connectivity test
 ```
 
 To prevent future problems make sure that all tests pass. If some tests fail
 try turning off (= 0) reverse path filtering on the server:
 
-```zsh
+```bash
 sysctl net.ipv4.conf.all.rp_filter
 sysctl net.ipv4.conf.default.rp_filter
 ```
@@ -224,7 +224,7 @@ installation the configuration in the Git repository has to match.
 Ensure the Cilium version and Helm values in your Git repo match your live
 cluster:
 
-```zsh
+```bash
 cilium-cli version
 helm get values cilium -n kube-system -o yaml
 ```
@@ -245,7 +245,7 @@ Before continuing push the updated `cilium.yaml` to Git.
 
 Generate SSH Key without password and save it to a temporary location.
 
-```zsh
+```bash
 ssh-keygen -t ed25519 -C "flux@homelab"
 ```
 
@@ -258,7 +258,7 @@ Enter file in which to save the key (/home/dean/.ssh/id_ed25519): /tmp/flux_ssh
 
 Give read permissions of public key (`/tmp/flux_ssh.pub`) to Git repository.
 
-```zsh
+```bash
 cat /tmp/flux_ssh.pub
 ```
 
@@ -266,11 +266,11 @@ cat /tmp/flux_ssh.pub
 
 Add SSH key and known hosts as secret.
 
-```zsh
+```bash
 ssh-keyscan -T 240 codeberg.org | tee /tmp/flux_known_hosts
 ```
 
-```zsh
+```bash
 kubectl create namespace flux-system
 kubectl create secret generic flux-system \
   --namespace=flux-system \
@@ -280,32 +280,32 @@ kubectl create secret generic flux-system \
 
 ### Install Flux
 
-```zsh
+```bash
 kubectl apply -f clusters/production/flux-system/gotk-components.yaml
 ```
 
 Check if Pods are ready:
 
-```zsh
+```bash
 kubectl -n flux-system get pod
 ```
 
 Update the specified repository URL in `gotk-sync.yaml`, then apply it:
 
-```zsh
+```bash
 kubectl apply -f clusters/production/flux-system/gotk-sync.yaml
 ```
 
 Check if installation was successful (all Kustomizations except `apps` should be ready):
 
-```zsh
+```bash
 flux get source git
 flux get kustomization
 ```
 
 ## 5 Generate encryption key for secrets
 
-```zsh
+```bash
 age-keygen | kubectl create secret generic sops-age \
 --namespace=flux-system \
 --from-file=age.agekey=/dev/stdin
@@ -329,7 +329,7 @@ creation_rules:
 
 Commit the `sops` config containing the public key:
 
-```zsh
+```bash
 git add .sops.yaml
 git commit -m 'ops: add public key for secrets generation'
 ```
@@ -348,7 +348,7 @@ you need to install `iscsi` with your package manager.
 
 [Longhorn CLI Docs](https://longhorn.io/docs/1.11.2/advanced-resources/longhornctl/)
 
-```zsh
+```bash
 curl -L https://github.com/longhorn/cli/releases/download/xxx -o longhornctl
 chmod +x longhornctl
 sudo -E ./longhornctl install preflight
@@ -359,7 +359,7 @@ sudo -E ./longhornctl check preflight
 
 All Kustomizations should be ready now.
 
-```zsh
+```bash
 flux get kustomization
 ```
 
@@ -371,7 +371,7 @@ Developing
 In this example a password for Postgresql with a length of 16 characters
 is generated and encrypted.
 
-```zsh
+```bash
 kubectl -n default create secret generic postgresql \
 --namespace=nextcloud \
 --from-literal=admin-password=$(pwgen -sBcn 20 1) \
@@ -384,7 +384,7 @@ kubectl -n default create secret generic postgresql \
 
 Encrypt the created secrets using the `sops` CLI.
 
-```zsh
+```bash
 sops --encrypt --in-place apps/production/secrets/nextcloud-postgresql.yaml
 ```
 
@@ -404,7 +404,7 @@ resources:
 The diff command is used to do a server-side dry-run on flux resources
 and print the difference.
 
-```zsh
+```bash
 flux diff kustomization my-app --path apps/<app>
 ```
 
@@ -412,7 +412,7 @@ flux diff kustomization my-app --path apps/<app>
 
 ## Apply changes in the cluster
 
-```zsh
+```bash
 git add -A
 git commit -m "feat: ..."
 git push
@@ -422,11 +422,11 @@ git push
 
 After changes are applied run the integration tests.
 
-```zsh
+```bash
 flux get kustomization
 ```
 
-```zsh
+```bash
 sudo docker build -t homelab-tests tests
 sudo docker run -it --rm homelab-tests
 ```
@@ -436,7 +436,7 @@ Troubleshooting
 
 ## Undo faulty cluster change
 
-```zsh
+```bash
 git revert <working-commit-hash>
 ```
 
@@ -449,25 +449,25 @@ It is recommended that the Flux CLI is installed on your local machine.
 Keep in mind that the apply process (reconcilation) can take a few minutes.
 To verify that Flux applied the latest git commit:
 
-```zsh
+```bash
 flux get kustomization
 ```
 
 Check if Helm installations were successful:
 
-```zsh
+```bash
 flux get helmreleases -A
 ```
 
 Alternatively you can check all Flux resources with:
 
-```zsh
+```bash
 flux get all -A
 ```
 
 If a Helm installation failed too many times, it goes into a timeout state.
 You can restart the installation of a Chart with:
 
-```zsh
+```bash
 kubectl -n flux-system rollout restart deploy helm-controller
 ```
