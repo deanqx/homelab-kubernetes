@@ -41,7 +41,7 @@ spec:
     ipam:
       operator:
         clusterPoolIPv4PodCIDRList:
-        - 10.42.0.0/16
+          - 10.42.0.0/16
     k8sClientRateLimit:
       burst: 40
       qps: 20

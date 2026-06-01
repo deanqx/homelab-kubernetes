@@ -13,9 +13,9 @@ spec:
     privateKeySecretRef:
       name: tls-account-key
     solvers:
-    - http01:
-        gatewayHTTPRoute:
-          parentRefs:
-            - name: cilium-gateway
-              namespace: gateway-system
-              kind: Gateway
+      - http01:
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: cilium-gateway
+                namespace: gateway-system
+                kind: Gateway

@@ -5,11 +5,11 @@ metadata:
   namespace: nextcloud
 spec:
   parentRefs:
-  - name: cilium-gateway
-    namespace: gateway-system
-    sectionName: https-nextcloud
+    - name: cilium-gateway
+      namespace: gateway-system
+      sectionName: https-nextcloud
   hostnames:
-  - "cloud.kowi.it"
+    - "cloud.kowi.it"
   rules:
     - matches:
         - path:
