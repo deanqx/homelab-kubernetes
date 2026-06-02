@@ -23,7 +23,7 @@ GitOps is a practice where a Git repository acts as the single source of truth
 for your infrastructure, automatically syncing and self-healing your live
 system to match whatever code is merged into Git.
 
-This reposotitory uses Kubernetes with FluxCD.
+This repository uses Kubernetes with FluxCD.
 You should be familiar with the basics of these technologies.
 The example repo was used as reference:
 [fluxcd/flux2-kustomize-helm-example](https://github.com/fluxcd/flux2-kustomize-helm-example)
@@ -133,8 +133,13 @@ kubectl get nodes
 
 ## 3 Cilium Deployment
 
-Cilium is the networking, security, and observability engine for this
-Kubernetes cluster.
+Think of Cilium as a distributed virtual switch and firewall running directly
+inside the Linux kernel. Instead of relying on slow legacy routing
+rules (iptables), it uses eBPF to inject bytecode into the network stack,
+letting it route, NAT, and secure traffic at wire speed. By using VXLAN,
+it abstracts the local Pod IP addresses, allowing your multi-location nodes
+to talk to each other without needing complex BGP peering or route propagation
+on your physical WAN routers.
 
 ### Gateway API Installation
 
@@ -150,42 +155,34 @@ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/re
 
 ### Cilium Installation
 
-Optionally modify `--version` to the [latest](https://github.com/cilium/cilium/releases).
+Copy the Helm values from `infrastructure/controllers/cilium.yaml` and store it
+into a temporary file `cilium_values.yaml`.
 
-```bash
-cilium-cli install --version 1.19.4 \
-  --set devices=enp1s0 \
-  --set gatewayAPI.enabled=true \
-  --set hostFirewall.enabled=true \
-  --set l2announcements.enabled=true \
-  --set bpf.masquerade=true \
-  --set kubeProxyReplacement=true \
-  --set ipam.operator.clusterPoolIPv4PodCIDRList="{10.42.0.0/16}" \
-  --set k8sClientRateLimit.qps=20 \
-  --set k8sClientRateLimit.burst=40
+`infrastructure/controllers/cilium.yaml`:
+
+```yaml
+spec:
+  values:
+    cluster:
+      name: default
+...
 ```
 
-- `devices=enp1s0`: Adjust this to your internet hardware interface.
+`cilium_values.yaml`:
 
-- `l2announcements.enabled=true`: Enables the Layer 2 Layer Load Balancer
-  feature, allowing Cilium to respond to ARP requests and host Virtual IPs
-  on your local network.
+```yaml
+cluster:
+  name: default
+...
+```
 
-- `hostFirewall.enabled=true`: Use Cilium as host firewall.
+Make sure the version is matching Flux's in `clusters/production/infrastructure.yaml`.
+Optionally modify the version to the [latest](https://github.com/cilium/cilium/releases).
 
-- `bpf.masquerade=true`: Enable native IP masquerade support in eBPF.
-
-- `kubeProxyReplacement=true`: Tells Cilium to fully replace kube-proxy using
-  high-performance eBPF routing instead of legacy iptables.
-
-- `ipam.operator.clusterPoolIPv4PodCIDRList="{10.42.0.0/16}"`:
-  Sets the IP address range assigned to Pods, precisely matching k3s's
-  default internal network.
-
-- `k8sClientRateLimit.qps=20 & --set k8sClientRateLimit.burst=40`:
-  Increases how fast Cilium is allowed to talk to the Kubernetes API.
-  This prevents Cilium from being throttled due to the high volume of
-  rapid lease updates required by L2 announcements.
+```bash
+helm install cilium oci://ghcr.io/cilium/charts/cilium \
+--version 1.19.4 --values cilium_values.yaml
+```
 
 ### Validate the Installation
 
