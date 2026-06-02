@@ -30,7 +30,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure
+  name: infra-controllers
   namespace: flux-system
 spec:
   dependsOn:
@@ -38,12 +38,32 @@ spec:
   interval: 1h
   retryInterval: 2m
   timeout: 5m
-  # The most damage pruning could do here is deleting
-  # TLS certificates but the database data is protected
-  # by a PVC and is located in ./apps.
   prune: true
   wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/production
+  path: ./infrastructure/controllers
+  postBuild:
+    substitute:
+      cilium_version: "1.19.4"
+      cert_manager_version: "1.20.2"
+      longhorn_version: "1.11.2"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-configs
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-controllers
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./infrastructure/configs

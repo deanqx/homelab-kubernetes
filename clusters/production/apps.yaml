@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure
+    - name: infra-configs
   interval: 1h
   retryInterval: 2m
   timeout: 5m
@@ -15,3 +15,47 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./apps/production
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: nextcloud-db
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-configs
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/production/nextcloud/database
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: nextcloud-app
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: nextcloud-db
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/production/nextcloud/app
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

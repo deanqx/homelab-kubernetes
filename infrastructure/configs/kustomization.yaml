@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - gateway.yaml
   - cilium-loadbalancer.yaml
-  - ../base
-patches:
-  - path: versions.yaml
+  - longhorn-storageclass.yaml
+  - tls-issuer.yaml
