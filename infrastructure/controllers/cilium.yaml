@@ -32,28 +32,33 @@ spec:
     name: cilium
     namespace: kube-system
   values:
-    bpf:
-      masquerade: true
     cluster:
       name: default
-    gatewayAPI:
+    # points to control plane
+    k8sServiceHost: dean-homelab
+    k8sServicePort: 6443
+    # bypasses iptables, use eBPF instead
+    kubeProxyReplacement: true
+    bpf:
+      # Source NAT for traffic going out of the cluster
+      # uses node ip for traffic
+      # could be disabled when BGP is enabled
+      masquerade: true
+    # required for routing between different locations
+    routingMode: tunnel
+    tunnelProtocol: vxlan
+    # temporary solution until BGP is used
+    l2announcements:
       enabled: true
-    hostFirewall:
-      enabled: true
+    # IP Address Management
     ipam:
       operator:
         clusterPoolIPv4PodCIDRList:
           - 10.42.0.0/16
-    k8sClientRateLimit:
-      burst: 40
-      qps: 20
-    k8sServiceHost: dean-homelab
-    k8sServicePort: 6443
-    kubeProxyReplacement: true
-    devices: enp1s0
-    l2announcements:
+        clusterPoolIPv4MaskSize: 24
+    gatewayAPI:
+      enabled: true
+    hostFirewall:
       enabled: true
     operator:
       replicas: 1
-    routingMode: tunnel
-    tunnelProtocol: vxlan
