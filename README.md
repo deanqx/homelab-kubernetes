@@ -432,42 +432,68 @@ docker run --rm homelab-tests
 Troubleshooting
 ===============
 
-## Undo faulty cluster change
+## Undo faulty change
 
 ```bash
 git revert <working-commit-hash>
+```
+
+## Kubernetes
+
+### Check Deployment Status
+
+All pods should be healthy and without recent restarts.
+
+```bash
+kubectl get pod -A
+```
+
+### Logs
+
+Let's say Cilium is in a crash loop.
+`ds/` is an alias for `daemonset/`:
+
+```bash
+kubectl -n kube-system logs ds/cilium
+```
+
+If the previous pod crashed and therefore recently restarted:
+
+```bash
+kubectl -n kube-system logs ds/cilium --previous
+```
+
+If the logs don't contain useful information try `describe`:
+
+```bash
+kubectl -n kube-system describe ds/cilium
+```
+
+### Interactive Shell inside Pod
+
+```bash
+kubectl -n nextcloud exec -it deploy/nextcloud -- bash
 ```
 
 ## FluxCD
 
 It is recommended that the Flux CLI is installed on your local machine.
 
-### Changes are not applied
+[Official Troubleshooting cheatsheet](https://fluxcd.io/flux/cheatsheets/troubleshooting/)
 
-Keep in mind that the apply process (reconcilation) can take a few minutes.
-To verify that Flux applied the latest git commit:
+### Check Deployment Status
+
+`ks` is an alias for `kustomization`:
 
 ```bash
-flux get kustomization
+flux get ks
 ```
 
-Check if Helm installations were successful:
+Check if Helm installations were successful.
+`hr` is an alias for `helmrelease`:
 
 ```bash
-flux get helmreleases -A
-```
-
-Alternatively you can check all Flux resources with:
-
-```bash
-flux get all -A
-```
-
-If a Helm installation failed too many times, it goes into a timeout state.
-You can restart the installation of a Chart with:
-
-```bash
-kubectl -n flux-system rollout restart deploy helm-controller
+flux get hr -A
 ```
 
 ## Longhorn Storage
