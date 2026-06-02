@@ -9,7 +9,7 @@ spec:
     # can be created in a certain time, use this for testing:
     # server: https://acme-staging-v02.api.letsencrypt.org/directory
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: 110404616+deanqx@users.noreply.github.com
+    email: dean@kowatsch.de
     privateKeySecretRef:
       name: tls-account-key
     solvers:
