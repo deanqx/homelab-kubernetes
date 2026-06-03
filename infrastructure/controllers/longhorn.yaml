@@ -15,7 +15,7 @@ metadata:
 spec:
   interval: 12h
   install:
-    crds: CreateReplace
+    crds: Create
     remediation:
       retries: 3
   upgrade:

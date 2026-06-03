@@ -25,8 +25,10 @@ system to match whatever code is merged into Git.
 
 This repository uses Kubernetes with FluxCD.
 You should be familiar with the basics of these technologies.
-The example repo was used as reference:
+The example repo was used as overall reference:
 [fluxcd/flux2-kustomize-helm-example](https://github.com/fluxcd/flux2-kustomize-helm-example)
+And this example for the monitoring setup:
+[fluxcd/flux2-monitoring-example](https://github.com/fluxcd/flux2-monitoring-example)
 
 The entry point for FluxCD is `clusters/production`.
 From there it uses Kustomization files to find the manifests.
