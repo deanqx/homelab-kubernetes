@@ -16,6 +16,18 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-monitor
+      hostname: dashboard.kowi.it
+      port: 443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: monitor-kowi-it-tls
+            kind: Secret
     - name: https-home-assistant
       hostname: home.kowi.it
       port: 443
