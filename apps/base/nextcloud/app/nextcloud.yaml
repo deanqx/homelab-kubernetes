@@ -44,7 +44,6 @@ spec:
         proxies.config.php: |-
           <?php
           $CONFIG = array (
-            'trusted_proxies' => [ '10.142.0.0/24' ],
             'overwritehost' => 'cloud.kowi.it',
             'overwriteprotocol' => 'https',
             'overwritewebroot' => '/',
