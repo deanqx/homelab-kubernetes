@@ -11,6 +11,9 @@ Overview
 
 - Flux CD: GitOps tool for Kubernetes
 
+- Grafana with Prometheus: used to collect metrics (Prometheus) and display
+  them in a web interface (Grafana).
+
 - Mozilla SOPS: encrypts secrets
 
 - Longhorn: storage over multiple nodes
