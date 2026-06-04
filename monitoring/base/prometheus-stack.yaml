@@ -43,6 +43,8 @@ spec:
         # username=admin
         userKey: username
         passwordKey: password
+    kubeProxy:
+      enabled: false
     prometheus:
       prometheusSpec:
         # delete data older than 10 days or larger than 18Gi
