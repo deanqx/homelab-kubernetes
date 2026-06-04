@@ -6,4 +6,5 @@ metadata:
 spec:
   chart:
     spec:
+      # https://github.com/nextcloud/helm/releases
       version: "9.1.1"
