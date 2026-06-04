@@ -37,6 +37,12 @@ spec:
   values:
     alertmanager:
       enabled: false
+    grafana:
+      admin:
+        existingSecret: grafana
+        # username=admin
+        userKey: username
+        passwordKey: password
     prometheus:
       prometheusSpec:
         # delete data older than 10 days or larger than 18Gi
