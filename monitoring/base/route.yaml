@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: cilium-gateway
+      namespace: gateway-system
+      sectionName: https-monitor
+  hostnames:
+    - "dashboard.kowi.it"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            add:
+              - name: Strict-Transport-Security
+                value: "max-age=15552000"
+      backendRefs:
+        - name: prometheus-stack-grafana
+          kind: Service
+          port: 80

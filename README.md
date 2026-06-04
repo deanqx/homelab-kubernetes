@@ -382,10 +382,23 @@ kubectl -n default create secret generic postgresql \
 -o yaml > apps/production/nextcloud/database/postgresql-secret.yaml
 ```
 
-Encrypt the created secrets using the `sops` CLI.
+Alternatively the password could be imported from ZX2C4 `pass`:
+
+```bash
+kubectl -n default create secret generic grafana \
+--namespace=monitoring \
+--from-literal=username=admin \
+--from-literal=password=$(pass homelab/admin@monitor | head -n 1) \
+--dry-run=client \
+-o yaml > monitoring/production/grafana-secret.yaml
+```
+
+Encrypt the created secrets using the `sops` CLI:
 
 ```bash
 sops --encrypt --in-place apps/production/nextcloud/database/postgresql-secret.yaml
+# or
+sops --encrypt --in-place monitoring/production/grafana-secret.yaml
 ```
 
 Update `apps/production/nextcloud/database/kustomization.yaml` to include the
