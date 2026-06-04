@@ -302,7 +302,39 @@ flux get source git
 flux get kustomization
 ```
 
-## 5 Generate encryption key for secrets
+Next complete
+[Generate encryption key for secrets](#generate-encryption-key-for-secrets).
+
+## 5 Longhorn storage
+
+### Installation
+
+Before this repository can be deployed on the cluster,
+you need to install `iscsi` with your package manager.
+
+### Check installation requirements
+
+[Longhorn CLI Docs](https://longhorn.io/docs/1.11.2/advanced-resources/longhornctl/)
+
+```bash
+curl -L https://github.com/longhorn/cli/releases/download/xxx -o longhornctl
+chmod +x longhornctl
+sudo -E ./longhornctl install preflight
+sudo -E ./longhornctl check preflight
+```
+
+## 6 Verify working installation
+
+All Kustomizations should be ready now.
+
+```bash
+flux get kustomization
+```
+
+Developing
+==========
+
+## Generate encryption key for secrets
 
 ```bash
 age-keygen | kubectl create secret generic sops-age \
@@ -336,48 +368,19 @@ git commit -m 'ops: add public key for secrets generation'
 Secrets can now be created following the
 [create secrets section](#create-secrets).
 
-## 6 Longhorn storage
-
-### Installation
-
-Before this repository can be deployed on the cluster,
-you need to install `iscsi` with your package manager.
-
-### Check installation requirements
-
-[Longhorn CLI Docs](https://longhorn.io/docs/1.11.2/advanced-resources/longhornctl/)
-
-```bash
-curl -L https://github.com/longhorn/cli/releases/download/xxx -o longhornctl
-chmod +x longhornctl
-sudo -E ./longhornctl install preflight
-sudo -E ./longhornctl check preflight
-```
-
-## 7 Verify working installation
-
-All Kustomizations should be ready now.
-
-```bash
-flux get kustomization
-```
-
-Developing
-==========
-
 ## Create secrets
 
-In this example a password for Postgresql with a length of 16 characters
+In this example a password for PostgreSQL with a length of 25 characters
 is generated and encrypted.
 
 ```bash
 kubectl -n default create secret generic postgresql \
 --namespace=nextcloud \
 --from-literal=username=nextcloud \
---from-literal=admin-password=$(pwgen -sBcn 20 1) \
---from-literal=user-password=$(pwgen -sBcn 20 1) \
---from-literal=replication-password=$(pwgen -sBcn 20 1) \
---from-literal=metrics-password=$(pwgen -sBcn 20 1) \
+--from-literal=admin-password=$(pwgen -sBcn 25 1) \
+--from-literal=user-password=$(pwgen -sBcn 25 1) \
+--from-literal=replication-password=$(pwgen -sBcn 25 1) \
+--from-literal=metrics-password=$(pwgen -sBcn 25 1) \
 --dry-run=client \
 -o yaml > apps/production/nextcloud/database/postgresql-secret.yaml
 ```

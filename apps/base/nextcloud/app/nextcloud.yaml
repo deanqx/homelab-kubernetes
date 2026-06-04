@@ -38,8 +38,10 @@ spec:
       port: 8080
     nextcloud:
       host: cloud.kowi.it
-      username: admin
-      password: changeme4321
+      existingSecret:
+        enabled: true
+        usernameKey: username
+        passwordKey: password
       configs:
         proxies.config.php: |-
           <?php
@@ -64,8 +66,6 @@ spec:
       existingSecret:
         enabled: true
         secretName: postgresql
-        # The username has to be in the secret
-        # because of bad design of the chart.
         # username=nextcloud
         usernameKey: username
         passwordKey: user-password
