@@ -334,6 +334,14 @@ All Kustomizations should be ready now.
 flux get kustomization
 ```
 
+Upgrading
+=========
+
+```bash
+flux install --components-extra=source-watcher \
+--export > ./clusters/production/flux-system/gotk-components.yaml
+```
+
 Developing
 ==========
 
