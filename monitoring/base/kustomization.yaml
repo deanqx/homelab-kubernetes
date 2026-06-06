@@ -3,4 +3,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - prometheus-stack.yaml
+  - loki.yaml
+  - alloy.yaml
   - route.yaml

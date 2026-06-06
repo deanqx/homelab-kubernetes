@@ -43,6 +43,14 @@ spec:
         # username=admin
         userKey: username
         passwordKey: password
+      # ref: https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
+      # ref: https://grafana.com/docs/grafana/latest/datasources/loki/configure-loki-data-source/
+      additionalDataSources:
+        - name: Loki
+          type: loki
+          access: proxy
+          url: http://loki.monitoring.svc.cluster.local:3100
+          editable: false
     kubeProxy:
       enabled: false
     prometheus:
