@@ -23,3 +23,7 @@ spec:
     substitute:
       # https://github.com/prometheus-community/helm-charts/releases
       prometheus_version: "86.1.1"
+      # https://github.com/grafana-community/helm-charts/releases
+      loki_version: "17.1.7"
+      # https://github.com/grafana/helm-charts/releases?q=alloy
+      alloy_version: "1.8.2"

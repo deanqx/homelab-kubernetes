@@ -1,0 +1,143 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: alloy
+  namespace: monitoring
+spec:
+  interval: 24h
+  url: https://grafana.github.io/helm-charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alloy
+  namespace: monitoring
+spec:
+  interval: 12h
+  install:
+    crds: Create
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+      # Automatically rollback on failure
+      remediateLastFailure: true
+  chart:
+    spec:
+      version: "${alloy_version}"
+      chart: alloy
+      sourceRef:
+        kind: HelmRepository
+        name: alloy
+        namespace: monitoring
+  # ref: https://github.com/grafana/alloy/blob/main/operations/helm/charts/alloy/values.yaml
+  values:
+    alloy:
+      mounts:
+        # collect logs from host /var/log
+        varlog: true
+      configMap:
+        content: |
+          loki.write "default" {
+            endpoint {
+              url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+            }
+          }
+
+          // # Host system logs
+          // ref: https://grafana.com/docs/alloy/latest/reference/components/loki/loki.source.journal/
+
+          loki.source.journal "node_errors" {
+            path       = "/var/log/journal"
+            forward_to = [loki.process.add_node_labels.receiver]
+          }
+
+          loki.process "add_node_labels" {
+            stage.static_labels {
+              values = {
+                job       = "node/journal",
+                node_name = sys.env("HOSTNAME"),
+                cluster   = "production",
+              }
+            }
+            forward_to = [loki.write.default.receiver]
+          }
+
+          // # Kubernetes Pod logs
+          // ref: https://grafana.com/docs/alloy/latest/collect/logs-in-kubernetes/
+
+          discovery.kubernetes "pod" {
+            role = "pod"
+            selectors {
+              role = "pod"
+              field = "spec.nodeName=" + coalesce(sys.env("HOSTNAME"), constants.hostname)
+            }
+          }
+
+          discovery.relabel "pod_logs" {
+            targets = discovery.kubernetes.pod.targets
+
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              action = "replace"
+              target_label = "namespace"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_name"]
+              action = "replace"
+              target_label = "pod"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_container_name"]
+              action = "replace"
+              target_label = "container"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+              action = "replace"
+              target_label = "app"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_container_name"]
+              action = "replace"
+              target_label = "job"
+              separator = "/"
+              replacement = "$1"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+              action = "replace"
+              target_label = "__path__"
+              separator = "/"
+              replacement = "/var/log/pods/*$1/*.log"
+            }
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_container_id"]
+              action = "replace"
+              target_label = "container_runtime"
+              regex = `^(\S+):\/\/.+$`
+              replacement = "$1"
+            }
+          }
+
+          loki.source.kubernetes "pod_logs" {
+            targets    = discovery.relabel.pod_logs.output
+            forward_to = [loki.process.pod_logs.receiver]
+          }
+
+          loki.process "pod_logs" {
+            stage.static_labels {
+              values = {
+                cluster = "production",
+              }
+            }
+            forward_to = [loki.write.default.receiver]
+          }

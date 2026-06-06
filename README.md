@@ -11,14 +11,13 @@ Overview
 
 - Flux CD: GitOps tool for Kubernetes
 
-- Grafana with Prometheus: used to collect metrics (Prometheus) and display
-  them in a web interface (Grafana).
-
 - Mozilla SOPS: encrypts secrets
 
 - Longhorn: storage over multiple nodes
 
-- Databases: like PostgreSQL or Redis
+- Databases: PostgreSQL and Redis
+
+- Monitoring: Grafana, Prometheus and Loki
 
 ## Getting started
 
@@ -39,6 +38,13 @@ From there it uses Kustomization files to find the manifests.
 This cluster has 3 nodes in 3 locations, to provide data integrity at all times.
 
 ## Deployed in Cluster
+
+### Monitoring
+
+- Grafana: web interface for monitoring data from Prometheus and Loki
+- Prometheus: collects and stores metrics like CPU usage over time
+- Loki by Grafana: stores logs
+- Alloy by Grafana: collects logs and sends them to Loki
 
 ### Nextcloud
 
