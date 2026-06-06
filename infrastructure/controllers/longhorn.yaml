@@ -32,8 +32,8 @@ spec:
         kind: HelmRepository
         name: longhorn
         namespace: longhorn-system
+  # ref: https://github.com/longhorn/charts/blob/v1.12.x/charts/longhorn/values.yaml
   values:
-    # Reference: https://longhorn.io/docs/1.11.2/references/helm-values/
     persistence:
       defaultClassReplicaCount: 1
     defaultSettings:
@@ -43,3 +43,8 @@ spec:
       replicaZoneSoftAntiAffinity: false
       # allow if secondary node is offline, the primary can still function degraded
       allowVolumeCreationWithDegradedAvailability: true
+    metrics:
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          release: prometheus-stack
