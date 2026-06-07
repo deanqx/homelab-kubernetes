@@ -1,7 +1,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: alloy
+  name: grafana-charts
   namespace: monitoring
 spec:
   interval: 24h
@@ -32,7 +32,7 @@ spec:
       chart: alloy
       sourceRef:
         kind: HelmRepository
-        name: alloy
+        name: grafana-charts
         namespace: monitoring
   # ref: https://github.com/grafana/alloy/blob/main/operations/helm/charts/alloy/values.yaml
   values:
