@@ -29,8 +29,8 @@ spec:
     kind: OCIRepository
     name: redis
     namespace: nextcloud
+  # ref: https://github.com/bitnami/charts/blob/main/bitnami/redis/README.md
   values:
-    # Reference: https://github.com/bitnami/charts/blob/main/bitnami/redis/README.md
     architecture: standalone
     auth:
       existingSecret: "redis"
@@ -43,8 +43,7 @@ spec:
         kubernetes.io/hostname: "dean-homelab"
       resources:
         requests:
-          cpu: 1
-          memory: 128Mi
+          cpu: 500m
+          memory: 512Mi
         limits:
-          cpu: 2
-          memory: 1024Mi
+          memory: 512Mi

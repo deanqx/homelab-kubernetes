@@ -51,3 +51,9 @@ spec:
       nodeSelector:
         # In case of an outtage of this node, change it to the secondary node name
         kubernetes.io/hostname: "dean-homelab"
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          memory: 512Mi

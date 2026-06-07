@@ -33,9 +33,16 @@ spec:
     kind: OCIRepository
     name: cert-manager
     namespace: gateway-system
+  # ref: https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/values.yaml
   values:
     crds:
       enabled: true
       keep: true
     config:
       enableGatewayAPI: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 64Mi

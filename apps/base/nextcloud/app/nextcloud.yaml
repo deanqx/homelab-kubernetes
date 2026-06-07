@@ -89,3 +89,9 @@ spec:
       enabled: true
       storageClass: longhorn-2node
       size: 100Gi
+    resources:
+      limits:
+        cpu: 100m
+        memory: 512Mi
+      requests:
+        memory: 512Mi
