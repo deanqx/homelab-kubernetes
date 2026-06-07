@@ -18,6 +18,8 @@ metadata:
   name: loki
   namespace: monitoring
 spec:
+  dependsOn:
+    - name: prometheus-stack
   interval: 12h
   install:
     crds: Create
@@ -34,11 +36,17 @@ spec:
     name: loki
     namespace: monitoring
   # ref: https://github.com/grafana-community/helm-charts/blob/main/charts/loki/values.yaml
+  # template: https://github.com/fluxcd/flux2-monitoring-example/blob/main/monitoring/controllers/loki-stack/release.yaml
   values:
     deploymentMode: Monolithic
     loki:
       # single tenant: allow cluster wide access
       auth_enabled: false
+      serviceMonitor:
+        enabled: true
+        labels:
+          app.kubernetes.io/part-of: kube-prometheus-stack
+      # template: https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
       commonConfig:
         replication_factor: 1
       storage:
@@ -46,18 +54,55 @@ spec:
       # ref: https://grafana.com/docs/loki/latest/operations/storage/schema/
       schemaConfig:
         configs:
-          - from: "2026-06-05"
+          - from: "2026-06-07"
             store: tsdb
             object_store: filesystem
             schema: v13
             index:
               prefix: index_
               period: 24h
+      pattern_ingester:
+        enabled: true
+      limits_config:
+        allow_structured_metadata: true
+        volume_enabled: true
+      ruler:
+        enable_api: true
     singleBinary:
       replicas: 1
       persistence:
         size: 10Gi
         storageClass: "longhorn-2node"
+    extraObjects:
+      - apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: loki-datasource
+          labels:
+            app: loki
+            chart: loki
+            release: loki
+            grafana_datasource: "1"
+            app.kubernetes.io/part-of: kube-prometheus-stack
+        data:
+          # ref: https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
+          # ref: https://grafana.com/docs/grafana/latest/datasources/loki/configure-loki-data-source/
+          loki-datasource.yaml: |-
+            datasources:
+            - name: Loki
+              type: loki
+              access: proxy
+              url: http://loki:{{ .Values.loki.server.http_listen_port }}
+              editable: false
+    chunksCache:
+      enabled: false
+    resultsCache:
+      enabled: false
+    # faster updates
+    test:
+      enabled: false
+    lokiCanary:
+      enabled: false
     # only used if loki.deploymentMode=SimpleScalable
     # ref: https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
     backend:
