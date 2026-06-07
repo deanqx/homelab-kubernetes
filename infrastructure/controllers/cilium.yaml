@@ -33,6 +33,7 @@ spec:
     kind: OCIRepository
     name: cilium
     namespace: kube-system
+  # ref: https://github.com/cilium/cilium/blob/main/install/kubernetes/cilium/values.yaml
   values:
     cluster:
       name: default
@@ -64,3 +65,9 @@ spec:
       enabled: true
     operator:
       replicas: 1
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1.5Gi
+      limits:
+        memory: 1.5Gi

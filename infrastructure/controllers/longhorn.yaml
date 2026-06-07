@@ -32,7 +32,7 @@ spec:
         kind: HelmRepository
         name: longhorn
         namespace: longhorn-system
-  # ref: https://github.com/longhorn/charts/blob/v1.12.x/charts/longhorn/values.yaml
+  # ref: https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
   values:
     persistence:
       defaultClassReplicaCount: 1
@@ -48,3 +48,9 @@ spec:
         enabled: true
         additionalLabels:
           release: prometheus-stack
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1536Mi
+      limits:
+        memory: 1536Mi
