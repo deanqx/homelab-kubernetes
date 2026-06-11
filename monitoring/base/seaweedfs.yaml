@@ -1,0 +1,81 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: seaweedfs
+  namespace: monitoring
+spec:
+  interval: 24h
+  url: https://seaweedfs.github.io/seaweedfs/helm
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: seaweedfs
+  namespace: monitoring
+spec:
+  interval: 12h
+  install:
+    crds: Create
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  chart:
+    spec:
+      version: "${seaweedfs_version}"
+      chart: seaweedfs
+      sourceRef:
+        kind: HelmRepository
+        name: seaweedfs
+        namespace: monitoring
+  # ref: https://github.com/seaweedfs/seaweedfs/blob/master/k8s/charts/seaweedfs/values.yaml
+  values:
+    global:
+      monitoring:
+        enabled: true
+        additionalLabels:
+          release: kube-prometheus-stack
+    master:
+      replicas: 1
+      data:
+        type: "persistentVolumeClaim"
+        storageClass: "local-path"
+        size: 5Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          memory: 128Mi
+    filer: # database for metadata
+      replicas: 1
+      s3:
+        enabled: true
+        enableAuth: true
+        existingConfigSecret: "seaweedfs-s3-secret"
+      data:
+        type: "persistentVolumeClaim"
+        storageClass: "local-path"
+        size: 5Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 258Mi
+        limits:
+          memory: 258Mi
+    volume:
+      replicas: 1
+      # with two nodes: "001"
+      defaultReplication: "000"
+      data:
+        type: "persistentVolumeClaim"
+        storageClass: "local-path"
+        size: 20Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 258Mi
+        limits:
+          memory: 258Mi

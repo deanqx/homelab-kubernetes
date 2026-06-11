@@ -13,7 +13,8 @@ Overview
 
 - Mozilla SOPS: encrypts secrets
 
-- Longhorn: storage over multiple nodes
+- Storage: SeaweedFS for S3 object storage and Longhorn for block storage over
+  multiple nodes
 
 - Databases: PostgreSQL and Redis
 
@@ -43,7 +44,7 @@ This cluster has 3 nodes in 3 locations, to provide data integrity at all times.
 
 - Grafana: web interface for monitoring data from Prometheus and Loki
 - Prometheus: collects and stores metrics like CPU usage over time
-- Loki by Grafana: stores logs
+- Loki by Grafana: stores logs with S3 in SeaweedFS
 - Alloy by Grafana: collects logs and sends them to Loki
 
 ### Nextcloud
@@ -340,6 +341,19 @@ All Kustomizations should be ready now.
 flux get kustomization
 ```
 
+## 7 Create S3 Buckets
+
+Loki the log database requires S3 and the buckets have to created manually.
+
+```bash
+kubectl -n monitoring port-forward svc/seaweedfs-s3 8333
+```
+
+```bash
+aws s3 --profile homelab_monitoring --endpoint-url http://localhost:8333 mb s3://chunks
+aws s3 --profile homelab_monitoring --endpoint-url http://localhost:8333 mb s3://ruler
+```
+
 Upgrading
 =========
 
@@ -387,6 +401,8 @@ Secrets can now be created following the
 
 ## Create secrets
 
+To regenerate an existing secret use `scripts/generate_secrets.sh`.
+
 In this example a password for PostgreSQL with a length of 25 characters
 is generated and encrypted.
 
@@ -431,6 +447,8 @@ resources:
   - postgresql-secret.yaml
   - ...
 ```
+
+The script at `scripts/generate_secrets.sh` should be updated.
 
 ## Check changes
 
@@ -547,4 +565,16 @@ If not, delete them carefully:
 
 ```bash
 kubectl -n longhorn-system delete volume pvc-...
+```
+
+## S3 Object Storage
+
+### List Buckets
+
+```bash
+kubectl -n monitoring port-forward svc/seaweedfs-s3 8333
+```
+
+```bash
+aws s3 --profile homelab_monitoring --endpoint-url http://localhost:8333 ls
 ```

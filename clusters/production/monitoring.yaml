@@ -27,3 +27,5 @@ spec:
       loki_version: "17.1.7"
       # https://github.com/grafana/helm-charts/releases?q=alloy
       alloy_version: "1.8.2"
+      # https://github.com/seaweedfs/seaweedfs/releases
+      seaweedfs_version: "4.32.0"

@@ -34,43 +34,79 @@ spec:
     name: loki
     namespace: monitoring
   # ref: https://github.com/grafana-community/helm-charts/blob/main/charts/loki/values.yaml
-  # template: https://github.com/fluxcd/flux2-monitoring-example/blob/main/monitoring/controllers/loki-stack/release.yaml
+  # root: https://github.com/fluxcd/flux2-monitoring-example/blob/main/monitoring/controllers/loki-stack/release.yaml
   values:
-    deploymentMode: Monolithic
+    defaults:
+      extraEnv:
+        # ref: https://grafana.com/docs/loki/latest/configure/examples/thanos-storage-configs/#s3-example
+        # these are the default AWS SDK env variables
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: seaweedfs-s3-secret
+              key: admin_access_key_id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: seaweedfs-s3-secret
+              key: admin_secret_access_key
     loki:
+      commonConfig:
+        replication_factor: 1
       # single tenant: allow cluster wide access
       auth_enabled: false
       serviceMonitor:
         enabled: true
         labels:
           app.kubernetes.io/part-of: kube-prometheus-stack
-      # template: https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
-      commonConfig:
-        replication_factor: 1
       storage:
-        type: filesystem
+        # better s3 client for Seaweedfs
+        use_thanos_objstore: true
+        bucketNames:
+          chunks: chunks
+          ruler: ruler
+        object_store:
+          type: s3
+          s3:
+            endpoint: "seaweedfs-s3:8333"
+            insecure: true
       # ref: https://grafana.com/docs/loki/latest/operations/storage/schema/
       schemaConfig:
         configs:
-          - from: "2026-06-07"
+          - from: "2026-01-01"
             store: tsdb
-            object_store: filesystem
+            object_store: s3
             schema: v13
             index:
               prefix: index_
               period: 24h
-      pattern_ingester:
-        enabled: true
-      limits_config:
-        allow_structured_metadata: true
-        volume_enabled: true
-      ruler:
-        enable_api: true
+    # faster deployments and less resource usage
+    test:
+      enabled: false
+    lokiCanary:
+      enabled: false
+    # disable cache for slower queries but less resource usage
+    chunksCache:
+      enabled: false
+    resultsCache:
+      enabled: false
+    deploymentMode: Monolithic
     singleBinary:
       replicas: 1
+      # used for accumulation before push to s3
+      # if deleted possibly all logs are pushed
       persistence:
+        storageClass: "local-path"
         size: 10Gi
-        storageClass: "longhorn-2node"
+    # only used if loki.deploymentMode=SimpleScalable
+    # ref: https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
+    backend:
+      replicas: 0
+    write:
+      replicas: 0
+    read:
+      replicas: 0
+    # make discoverable metrics collect
     extraObjects:
       - apiVersion: v1
         kind: ConfigMap
@@ -92,40 +128,3 @@ spec:
               access: proxy
               url: http://loki:{{ .Values.loki.server.http_listen_port }}
               editable: false
-    chunksCache:
-      enabled: false
-    resultsCache:
-      enabled: false
-    # faster updates
-    test:
-      enabled: false
-    lokiCanary:
-      enabled: false
-    # only used if loki.deploymentMode=SimpleScalable
-    # ref: https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
-    backend:
-      replicas: 0
-    write:
-      replicas: 0
-    read:
-      replicas: 0
-    ingester:
-      replicas: 0
-    querier:
-      replicas: 0
-    queryFrontend:
-      replicas: 0
-    queryScheduler:
-      replicas: 0
-    distributor:
-      replicas: 0
-    compactor:
-      replicas: 0
-    indexGateway:
-      replicas: 0
-    bloomPlanner:
-      replicas: 0
-    bloomBuilder:
-      replicas: 0
-    bloomGateway:
-      replicas: 0
