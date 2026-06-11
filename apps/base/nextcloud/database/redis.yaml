@@ -23,8 +23,6 @@ spec:
   upgrade:
     remediation:
       retries: 3
-      # Automatically rollback on failure
-      remediateLastFailure: true
   chartRef:
     kind: OCIRepository
     name: redis

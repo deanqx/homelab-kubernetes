@@ -24,8 +24,6 @@ spec:
     crds: CreateReplace
     remediation:
       retries: 3
-      # Automatically rollback on failure
-      remediateLastFailure: true
   chart:
     spec:
       version: "${alloy_version}"
