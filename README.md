@@ -64,6 +64,37 @@ like Word and Teams.
 - [Home Assistant](https://www.home-assistant.io/): Controls my smart home
   devices. Cilium is used as reverse-proxy and Cert-Manager for https.
 
+## Backup Strategy
+
+These are the goals (following the 3-2-1 Backup Rule):
+
+1. Create backups automatically.
+2. Verify regularly for completeness.
+3. Keep at least three copies of the data.
+4. Keep backups on two different devices or media.
+5. Store at least one copy in an offsite location to protect against physical
+   disasters.
+6. Use incremental storing.
+7. Decouple from main architecture like Kubernetes (deleting the cluster should
+   not result in a deletion of the Backups).
+8. Principle of least privilege: forbid backup application to delete backups.
+
+### Kubernetes Cluster
+
+Using Kubernetes CronJob to trigger the creation of a new backup.
+
+- Postgres: `pg_dump` is triggered by a K8s CronJob. Applications do not have to
+  halt because of a concept called MVCC (Multi-Version Concurrency Control).
+
+- Longhorn: Native backup solution and sent to S3.
+  Triggered by Longhorn's RecurringJob.
+
+- S3: rclone is triggered by a K8s CronJob
+
+### Docker
+
+- Volumes: Restic to a S3, scheduled via Host Cron.
+
 Installation
 ============
 
