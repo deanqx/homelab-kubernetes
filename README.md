@@ -402,6 +402,48 @@ mcli mb homelab_monitoring/chunks
 mcli mb homelab_monitoring/ruler
 ```
 
+## 8 Backup Server
+
+### Setup S3
+
+```bash
+cd backup-system
+```
+
+**Warning:** The files `docker-compose.yaml` and `garage.toml` contain secrets,
+these have to be regenerated for production use.
+
+```bash
+sudo docker compose up -d
+sudo docker compose logs
+```
+
+The script serves as an example and should not be used directly in a production
+environment without reviewing it first:
+
+```bash
+./setup_garage.sh
+```
+
+Copy extract these values from `backup-system/docker-compose.yaml`:
+
+```bash
+export GARAGE_DEFAULT_ACCESS_KEY=GK0d12a14e9397dd5e222b7b4d
+export GARAGE_DEFAULT_SECRET_KEY=pcyhu9yhzJUCsa4yX37twEC3c
+```
+
+```bash
+mcli alias set homelab_backup http://localhost:3900 \
+$GARAGE_DEFAULT_ACCESS_KEY \
+$GARAGE_DEFAULT_SECRET_KEY
+```
+
+```bash
+mcli ls homelab_backup
+```
+
+If no errors occurred S3 is ready for the next steps.
+
 Upgrading
 =========
 
@@ -630,4 +672,12 @@ kubectl -n monitoring port-forward svc/seaweedfs-s3 8333
 
 ```bash
 mcli homelab_monitoring ls
+```
+
+### Backup Server
+
+Verbose output for Garage (S3):
+
+```bash
+docker compose exec -e RUST_LOG=garage=debug s3_object_storage /garage status
 ```
