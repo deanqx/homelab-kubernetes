@@ -66,8 +66,23 @@ function monitoring_s3 {
     echo "read_access_key_id: $read_access_key_id"
     echo "read_secret_access_key: $read_secret_access_key"
     # echo "seaweedfs_s3_config: $(echo $seaweedfs_s3_config | jq)"
-    echo "Tip: Setup the AWS CLI like this:"
-    echo "     aws configure --profile homelab_monitoring"
+    while true; do
+        echo    "Do you want to store the credentials in"
+        read -p "the Minio CLI as \"homelab_monitoring\"? (y/N): " store_in_mcli
+        case $store_in_mcli in
+        [Yy]* )
+            mcli alias set homelab_monitoring http://localhost:8333 \
+                $admin_access_key_id $admin_secret_access_key \
+                --api "s3v4"
+            break;;
+        [Nn]* )
+            echo "Skipping Minio CLI"
+            break;;
+        * )
+            echo "Please answer yes or no."
+            ;;
+        esac
+    done
     echo
 
     kubectl -n default create secret generic seaweedfs-s3-secret \
