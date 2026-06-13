@@ -1,3 +1,15 @@
+Homelab Kubernetes Cluster
+==========================
+
+_A project written by a human_
+
+This repository contains the Kubernetes manifests to control my homelab server
+cluster.
+
+- Main Repository: [Codeberg deanqx/homelab-kubernetes](https://codeberg.org/deanqx/homelab-kubernetes)
+- Mirror: [GitHub deanqx/homelab-kubernetes](https://github.com/deanqx/homelab-kubernetes)
+- Host system config: [Codeberg deanqx/homelab-nixos](https://codeberg.org/deanqx/homelab-nixos)
+
 Overview
 ========
 
@@ -376,13 +388,18 @@ flux get kustomization
 
 Loki the log database requires S3 and the buckets have to created manually.
 
+Run port forwarding in the background.
+
 ```bash
 kubectl -n monitoring port-forward svc/seaweedfs-s3 8333
 ```
 
+I recommend the Minio CLI over the AWS CLI because the AWS CLI is build for AWS
+services. The Minio CLI on the other hand is made for self-hosted S3.
+
 ```bash
-aws s3 --profile homelab_monitoring --endpoint-url http://localhost:8333 mb s3://chunks
-aws s3 --profile homelab_monitoring --endpoint-url http://localhost:8333 mb s3://ruler
+mcli mb homelab_monitoring/chunks
+mcli mb homelab_monitoring/ruler
 ```
 
 Upgrading
@@ -600,12 +617,17 @@ kubectl -n longhorn-system delete volume pvc-...
 
 ## S3 Object Storage
 
+I recommend the Minio CLI over the AWS CLI because the AWS CLI is build for AWS
+services. The Minio CLI on the other hand is made for self-hosted S3.
+
 ### List Buckets
+
+Run port forwarding in the background.
 
 ```bash
 kubectl -n monitoring port-forward svc/seaweedfs-s3 8333
 ```
 
 ```bash
-aws s3 --profile homelab_monitoring --endpoint-url http://localhost:8333 ls
+mcli homelab_monitoring ls
 ```
