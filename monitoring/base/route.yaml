@@ -9,7 +9,7 @@ spec:
       namespace: gateway-system
       sectionName: https-monitor
   hostnames:
-    - "dashboard.kowi.it"
+    - "monitor.kowi.it"
   rules:
     - matches:
         - path:
