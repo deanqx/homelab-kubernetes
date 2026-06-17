@@ -17,7 +17,7 @@ spec:
         namespaces:
           from: All
     - name: https-monitor
-      hostname: dashboard.kowi.it
+      hostname: monitor.kowi.it
       port: 443
       protocol: HTTPS
       allowedRoutes:
