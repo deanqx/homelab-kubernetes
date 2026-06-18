@@ -15,22 +15,16 @@ Overview
 
 ## Technologies
 
-- Kubernetes (k3s): compliant lightweight version of Kubernetes which is used
-  to orchestrate the cluster.
-
+- k3s: compliant lightweight version of Kubernetes which is used to orchestrate
+  the cluster.
 - Cilium: CNI (Container Network Interface), completely replaces the host
-  firewall and kube-proxy
-
-- Flux CD: GitOps tool for Kubernetes
-
-- Mozilla SOPS: encrypts secrets
-
-- Storage: SeaweedFS for S3 object storage and Longhorn for block storage over
-  multiple nodes
-
-- Databases: PostgreSQL and Redis
-
-- Monitoring: Grafana, Prometheus and Loki
+  firewall and kube-proxy.
+- Flux CD: GitOps for Kubernetes
+- SeaweedFS and Garage: S3 object storage
+- Longhorn: replicated block storage over multiple nodes
+- PostgreSQL: Database
+- Redis: Key-Value Cache
+- Grafana Stack: Monitoring
 
 ## Getting started
 
@@ -38,17 +32,15 @@ GitOps is a practice where a Git repository acts as the single source of truth
 for your infrastructure, automatically syncing and self-healing your live
 system to match whatever code is merged into Git.
 
-This repository uses Kubernetes with FluxCD.
+This repository uses Kubernetes with Flux.
 You should be familiar with the basics of these technologies.
-The example repo was used as overall reference:
-[fluxcd/flux2-kustomize-helm-example](https://github.com/fluxcd/flux2-kustomize-helm-example)
-And this example for the monitoring setup:
+The [fluxcd/flux2-kustomize-helm-example](https://github.com/fluxcd/flux2-kustomize-helm-example)
+repo was used as overall reference. And
 [fluxcd/flux2-monitoring-example](https://github.com/fluxcd/flux2-monitoring-example)
+for the monitoring setup:
 
-The entry point for FluxCD is `clusters/production`.
-From there it uses Kustomization files to find the manifests.
-
-This cluster has 3 nodes in 3 locations, to provide data integrity at all times.
+The entry point for Flux is `clusters/production`.
+From there it uses Kustomization files to find the Kubernetes `.yaml` manifests.
 
 ## Deployed in Cluster
 
@@ -93,6 +85,8 @@ These are the goals (following the 3-2-1 Backup Rule):
 
 ### Kubernetes Cluster
 
+Backups are work in progress.
+
 Using Kubernetes CronJob to trigger the creation of a new backup.
 
 - Postgres: `pg_dump` is triggered by a K8s CronJob. Applications do not have to
@@ -118,15 +112,11 @@ Install the required CLI tools on your personal system:
 sudo pacman --needed -S kubectl helm flux cilium-cli sops age pwgen
 ```
 
-## 1 Firewall
+Cilium is used as firewall for the host system, any host firewall like
+`iptables` or `nftables` have to be disabled. All host ports are currently not
+restricted.
 
-Cilium is used as firewall for the host system and services like SSH on port 22
-are automatically detected.
-
-Open port `6443` and `10250` in the host firewall
-([See Kubernetes Ports](https://kubernetes.io/docs/reference/networking/ports-and-protocols/)).
-
-## 2 K3s Setup
+## 1 K3s Setup
 
 SSH into your server and install K3s.
 
@@ -158,7 +148,9 @@ networking completely blank, so Cilium can take it over.
 - `--disable=servicelb`: Disable built-in LoadBalancer controller (Klipper LB).
   Cilium will be used instead.
 
-After deploying the config, copy the kubeconfig to your local machine.
+After deploying k3s, copy `/etc/rancher/k3s/k3s.yaml` to your local
+machine `~/kube/config` as described in the following. This config contains
+the Kubernetes API access key and a CA certificate for TLS.
 
 **On the server:**
 
@@ -172,21 +164,21 @@ Delete `~/k3s.yaml` after completing the next step.
 **On your local machine:**
 
 ```bash
-scp <SERVER>:k3s.yaml ~/.kube/config
+scp <SERVER_HOSTNAME>:k3s.yaml ~/.kube/config
 sed -i 's/127.0.0.1/<SERVER_HOSTNAME>/' ~/.kube/config
 ```
 
 Verify connection to Kubernetes.
 
 **Note:** Because there is no CNI installed yet, your nodes will show as
-NotReady if you run kubectl get nodes. This is completely normal and
+NotReady if you run `kubectl get nodes`. This is completely normal and
 will be fixed as soon as Cilium is installed.
 
 ```bash
 kubectl get nodes
 ```
 
-## 3 Cilium Deployment
+## 2 Cilium Deployment
 
 Think of Cilium as a distributed virtual switch and firewall running directly
 inside the Linux kernel. Instead of relying on slow legacy routing
@@ -291,7 +283,7 @@ was used in this guide.
 
 Before continuing push the updated `cilium.yaml` to Git.
 
-## 4 FluxCD Deployment
+## 3 FluxCD Deployment
 
 ### Generate Deployment Keys
 
@@ -358,7 +350,7 @@ flux get kustomization
 Next complete
 [Generate encryption key for secrets](#generate-encryption-key-for-secrets).
 
-## 5 Longhorn storage
+## 4 Longhorn storage
 
 ### Installation
 
@@ -376,7 +368,7 @@ sudo -E ./longhornctl install preflight
 sudo -E ./longhornctl check preflight
 ```
 
-## 6 Verify working installation
+## 5 Verify working installation
 
 All Kustomizations should be ready now.
 
@@ -384,7 +376,7 @@ All Kustomizations should be ready now.
 flux get kustomization
 ```
 
-## 7 Create S3 Buckets
+## 6 Create S3 Buckets
 
 Loki the log database requires S3 and the buckets have to created manually.
 
@@ -402,7 +394,7 @@ mcli mb homelab_monitoring/chunks
 mcli mb homelab_monitoring/ruler
 ```
 
-## 8 Backup Server
+## 7 Setup Backup Server
 
 ### Setup S3
 
