@@ -25,4 +25,4 @@ ports:
     port: 8123
 endpoints:
   - addresses:
-      - "10.101.2.5"
+      - "10.101.2.10"
