@@ -68,6 +68,10 @@ like Word and Teams.
 - [Home Assistant](https://www.home-assistant.io/): Controls my smart home
   devices. Cilium is used as reverse-proxy and Cert-Manager for https.
 
+## Network Structure
+
+Can be viewed at [./docs/network.md](./docs/network.md).
+
 ## Backup Strategy
 
 These are the goals (following the 3-2-1 Backup Rule):
