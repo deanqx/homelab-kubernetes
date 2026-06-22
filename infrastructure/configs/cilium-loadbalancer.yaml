@@ -5,7 +5,7 @@ metadata:
   namespace: gateway-system
 spec:
   blocks:
-    - cidr: 10.101.2.200/29
+    - cidr: "10.101.2.200/32"
 ---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
@@ -14,10 +14,11 @@ metadata:
   namespace: gateway-system
 spec:
   nodeSelector:
-    matchLabels: {}
-  serviceSelector:
-    matchLabels: {}
-  externalIPs: true
+    matchExpressions:
+      - key: kubernetes.io/hostname
+        operator: In
+        values:
+          - dean-homelab
   loadBalancerIPs: true
   interfaces:
-    - ^enp1s0$
+    - ^br0$
