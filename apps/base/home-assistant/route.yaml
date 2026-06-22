@@ -11,11 +11,7 @@ spec:
   hostnames:
     - "home.kowi.it"
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-      filters:
+    - filters:
         - type: ResponseHeaderModifier
           responseHeaderModifier:
             add:
