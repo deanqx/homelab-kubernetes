@@ -100,7 +100,8 @@ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/re
 ### Cilium Installation
 
 Copy the Helm values from `infrastructure/controllers/cilium.yaml` and store it
-into a temporary file `cilium_values.yaml`.
+into a temporary file `cilium_values.yaml`. Some values may have to be adjusted
+for the current setup.
 
 `infrastructure/controllers/cilium.yaml`:
 

@@ -33,6 +33,8 @@ spec:
     namespace: kube-system
   # ref: https://github.com/cilium/cilium/blob/main/install/kubernetes/cilium/values.yaml
   values:
+    devices:
+      - br0
     cluster:
       name: default
     # points to control plane
@@ -41,9 +43,8 @@ spec:
     # bypasses iptables, use eBPF instead
     kubeProxyReplacement: true
     bpf:
-      # Source NAT for traffic going out of the cluster
-      # uses node ip for traffic
-      # could be disabled when BGP is enabled
+      # SNAT (Source NAT): traffic going out of the cluster network gets node IP address
+      # by setting false native Linux masquerading is used
       masquerade: true
     # required for routing between different locations
     routingMode: tunnel
@@ -54,12 +55,13 @@ spec:
       enabled: true
       type: wireguard
       nodeEncryption: true
+    ipv4NativeRoutingCIDR: "10.42.0.0/16"
     # IP Address Management
     ipam:
       mode: cluster-pool
       operator:
         clusterPoolIPv4PodCIDRList:
-          - 10.42.0.0/16
+          - "10.42.0.0/16"
         clusterPoolIPv4MaskSize: 24
     gatewayAPI:
       enabled: true
@@ -67,7 +69,7 @@ spec:
       enabled: true
     operator:
       replicas: 1
-    # Network Observability
+    # Cilium's network observability tool
     hubble:
       relay:
         enabled: true
