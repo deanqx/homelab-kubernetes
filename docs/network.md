@@ -22,12 +22,15 @@
 | 10.101.2.14   | Home Assistant |
 | 10.101.2.15   | (Broadcast)    |
 
-| Port  | Forward to    | Description |
-| ----- | ------------- | ----------- |
-| 22    | node-1        | SSH         |
-|       |               | SSH         |
-|       |               | SSH         |
-| 80    | Load Balancer | HTTP        |
-| 443   | Load Balancer | HTTPS       |
-| 6443  | node-1        | K8s API     |
-| 25565 | node-1        | Minecraft   |
+| Port  | Forward to    | Description   |
+| ----- | ------------- | ------------- |
+| 22    | node-1        | SSH           |
+|       |               | SSH           |
+|       |               | SSH           |
+| 80    | Load Balancer | HTTP          |
+| 443   | Load Balancer | HTTPS         |
+| 4240  |               | Cilium Health |
+| 6443  | node-1        | K8s API       |
+| 8472  |               | VXLAN         |
+| 25565 | node-1        | Minecraft     |
+| 51871 |               | WireGuard     |

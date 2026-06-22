@@ -48,11 +48,15 @@ spec:
     # required for routing between different locations
     routingMode: tunnel
     tunnelProtocol: vxlan
-    # temporary solution until BGP is used
     l2announcements:
       enabled: true
+    encryption:
+      enabled: true
+      type: wireguard
+      nodeEncryption: true
     # IP Address Management
     ipam:
+      mode: cluster-pool
       operator:
         clusterPoolIPv4PodCIDRList:
           - 10.42.0.0/16
@@ -63,9 +67,13 @@ spec:
       enabled: true
     operator:
       replicas: 1
+    # Network Observability
+    hubble:
+      relay:
+        enabled: true
     resources:
       requests:
-        cpu: 500m
-        memory: 1.5Gi
+        cpu: 100m
+        memory: 512Mi
       limits:
-        memory: 1.5Gi
+        memory: 512Mi
