@@ -1,3 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic-forward
+  namespace: home-assistant
+spec:
+  # WARNING
+  # Forwarding with socat is used a work-around because Cilium v1.19.4
+  # can't use EndpointSlice to directly forward the traffic.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traffic-forward
+  template:
+    metadata:
+      labels:
+        app: traffic-forward
+    spec:
+      containers:
+        - name: socat
+          image: alpine/socat:latest
+          args: ["TCP-LISTEN:8123,fork,reuseaddr", "TCP:10.101.2.10:8123"]
+          ports:
+            - containerPort: 8123
+              name: socat-port
+          resources:
+            limits:
+              memory: 64Mi
+            requests:
+              memory: 64Mi
+              cpu: 10m
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -5,18 +37,7 @@ metadata:
   namespace: home-assistant
 spec:
   ports:
-    - port: 8123
----
-apiVersion: discovery.k8s.io/v1
-kind: EndpointSlice
-metadata:
-  name: home-assistant
-  namespace: home-assistant
-  labels:
-    kubernetes.io/service-name: home-assistant
-addressType: IPv4
-ports:
-  - port: 8123
-endpoints:
-  - addresses:
-      - "10.101.2.10"
+    - protocol: TCP
+      port: 8123
+  selector:
+    app: traffic-forward
