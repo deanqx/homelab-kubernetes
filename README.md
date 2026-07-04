@@ -68,6 +68,14 @@ like Word and Teams.
 - [Home Assistant](https://www.home-assistant.io/): Controls my smart home
   devices. Cilium is used as reverse-proxy and Cert-Manager for https.
 
+## Hardware
+
+| Servers      | CPU         | Cores | Single-Core | Multi-Core | Memory | Storage |
+| ------------ | ----------- | ----- | ----------- | ---------- | ------ | ------- |
+| dean-homelab | Intel N150  | 4     | 1159        | 2877       | 15 GB  | 460 GB  |
+| storage-01   | Intel E7500 | 2     | 399         | 683        | 3.7 GB | 800 GB  |
+CPU scores are measured with [Geekbench](https://geekbench.com).
+
 ## Network Structure
 
 Can be viewed at [./docs/network.md](./docs/network.md).

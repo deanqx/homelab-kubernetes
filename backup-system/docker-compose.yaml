@@ -1,18 +1,28 @@
 services:
-  s3_object_storage:
+  caddy:
+    # https://hub.docker.com/_/caddy/
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+      - "3900:3900"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+  garage-s3:
     # https://hub.docker.com/r/dxflrs/garage/tags
     image: dxflrs/garage:v2.3.0
     restart: unless-stopped
-    # required for internal RPC and maximum network performance
-    network_mode: host
+    # listening on port 3900
     volumes:
       - ./garage.toml:/etc/garage.toml
-      # needs speed
-      - /var/lib/garage/meta:/var/lib/garage/meta
-      # needs storage
-      - /var/lib/garage/data:/var/lib/garage/data
-    environment:
-      # openssl rand -hex 12
-      - GARAGE_DEFAULT_ACCESS_KEY=GK0d12a14e9397dd5e222b7b4d
-      # pwgen -sBcn 25 1
-      - GARAGE_DEFAULT_SECRET_KEY=pcyhu9yhzJUCsa4yX37twEC3c
+      # volume needs speed
+      - ./garage_s3/meta:/var/lib/garage/meta
+      # volume needs space
+      - ./garage_s3/data:/var/lib/garage/data
+volumes:
+  caddy_data:
+  caddy_config:

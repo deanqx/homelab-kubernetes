@@ -5,22 +5,32 @@
 set -euo pipefail
 
 shopt -s expand_aliases
-alias garage="docker compose exec s3_object_storage /garage"
-
-garage key import \
-$GARAGE_DEFAULT_ACCESS_KEY $GARAGE_DEFAULT_SECRET_KEY --yes
-
-garage bucket create home-assistant
+alias garage="docker compose exec garage-s3 /garage"
 
 # docker compose exec s3_object_storage /garage node id
 # 64cc87709556109bd326653a60ae4a3108df1f8952c9b5592004ce0bfba1d6bb@[::1]:3901
 # ...
 node_id=$(garage node id |& head -n 1 | cut -d'@' -f1)
 
-garage layout assign $node_id -c 10GB -z zone1
+read -p "Enter capacity for S3 (e.g. 100GB): " capacity
+read -p "Enter zone (e.g. germany): " zone
 
-garage layout show
+garage layout assign $node_id -c $capacity -z $zone
+garage layout apply --version 1
 
-echo
-echo "After you have verified the layout, apply it like this:"
-echo "sudo docker compose exec s3_object_storage /garage layout apply --version 1"
+echo "Script is incomplete, run following commands yourself"
+echo "Execute: cat setup_gerage.sh"
+exit
+
+garage bucket create home-assistant
+# ...
+# Bucket: 5ed137a323e2b862fbb87a52a6386a3055a065edbd6d6ac84c37aaade36e49d8
+# ...
+
+echo "-----------------------------"
+
+garage key create
+
+echo "Store the \`Key ID\` and \`Secret Key\` securely."
+
+garage bucket allow [BUCKET_ID] --read --write --owner --key [ACCESS_KEY_ID]
