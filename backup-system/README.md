@@ -4,16 +4,58 @@ and store them in S3 Object Storage.
 Setup
 =====
 
-## S3 Object Storage in Garage
+## S3 Server with Garage
 
-```bash
+```sh
 sudo docker compose up -d
 ```
 
-Run setup script and complete steps shown at the end:
+In the following an alias is used for `garage`:
 
-```bash
-./setup_garage.sh
+```sh
+alias garage="docker compose exec garage-s3 /garage"
+```
+
+```sh
+garage node id
+```
+
+Output:
+
+```
+64cc87709556109bd326653a60ae4a3108df1f8952c9b5592004ce0bfba1d6bb@[::1]:3901
+```
+
+Copy the node ID which is the part before `@`, in this case `64cc8770955`.
+
+```sh
+garage layout assign [NODE_ID] -c [STORAGE_CAPACITY] -z [ZONE]
+```
+
+## Prepare backup storage in Garage
+
+Create access key for backup script and an admin key.
+Store `Key ID` and `Secret Key` securely.
+
+```sh
+garage key create admin
+garage key create home-assistant
+```
+
+```sh
+garage bucket create home-assistant
+```
+
+Output:
+
+```
+Bucket: 5ed137a323e2b862fbb87a52a6386a3055a065edbd6d6ac84c37aaade36e49d8
+```
+
+Allow the backup script key and the admin key to access the bucket.
+
+```sh
+garage bucket allow [BUCKET_ID] --read --write --key [KEY_ID]
 ```
 
 ## Backup script for single server
@@ -41,6 +83,7 @@ export RESTIC_PASSWORD=
    To prevent malicious modifications only root is allowed to edit the files.
 
 ```bash
+sudo chown root:root home_assistant_backup.sh home_assistant_backup_secrets.sh
 sudo chmod 700 home_assistant_backup.sh home_assistant_backup_secrets.sh
 ```
 
