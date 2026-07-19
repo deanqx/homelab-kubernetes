@@ -1,36 +1,53 @@
-## Subnet 10.101.2.0/28
+# Domains
 
-| 10.101.2.0/29 |               |
-| ------------- | ------------- |
-| 10.101.2.0    | (Network)     |
-| 10.101.2.1    | Load Balancer |
-| 10.101.2.2    |               |
-| 10.101.2.3    |               |
-| 10.101.2.4    |               |
-| 10.101.2.5    |               |
-| 10.101.2.6    | Laptop        |
-| 10.101.2.7    | PC            |
+|                    | To      | Description       |
+| ------------------ | ------- | ----------------- |
+| www.deanqx.com     | Cluster | Blog              |
+| cloud.deanqx.com   | Cluster | Nextcloud         |
+| monitor.deanqx.com | Cluster | Grafana Dashboard |
+| home.deanqx.com    | Offsite | Home Assistant    |
+| backup.deanqx.com  | Offsite | Backup (S3)       |
 
-| 10.101.2.8/29 |                |
+# (a) Cluster Location
+
+Hosts Kubernetes Cluster
+## VLAN 10.101.2.0/29
+
+| 10.101.2.0/29 | Name                          |
+| ------------- | ----------------------------- |
+| 10.101.2.0    | (Network)                     |
+| 10.101.2.1    | Load Balancer (Traffic entry) |
+| 10.101.2.2    | a-master-01                   |
+| 10.101.2.3    | a-worker-01                   |
+| 10.101.2.4    | a-worker-02                   |
+| 10.101.2.5    |                               |
+| 10.101.2.6    |                               |
+| 10.101.2.7    | (Broadcast)                   |
+
+| from Port | forward to IP | Description   |
+| --------- | ------------- | ------------- |
+| 80        | Load Balancer | HTTP          |
+| 443       | Load Balancer | HTTPS         |
+| 3901      | Load Balancer | Garage S3 RPC |
+
+# (b) Offsite Location
+
+Hosts Backup storage and Home Assistant
+## VLAN 10.101.2.0/29
+
+| 10.101.2.0/29 | Name           |
 | ------------- | -------------- |
-| 10.101.2.8    | dean-homelab   |
-| 10.101.2.9    | storage-01     |
-| 10.101.2.10   |                |
-| 10.101.2.11   |                |
-| 10.101.2.12   |                |
-| 10.101.2.13   |                |
-| 10.101.2.14   | Home Assistant |
-| 10.101.2.15   | (Broadcast)    |
+| 10.101.2.0    | (Network)      |
+| 10.101.2.1    | b-backup-01    |
+| 10.101.2.2    | Home Assistant |
+| 10.101.2.3    |                |
+| 10.101.2.4    |                |
+| 10.101.2.5    |                |
+| 10.101.2.6    |                |
+| 10.101.2.7    | (Broadcast)    |
 
-| Port  | Forward to    | Description   |
-| ----- | ------------- | ------------- |
-| 22    | node-1        | SSH           |
-|       |               | SSH           |
-|       |               | SSH           |
-| 80    | Load Balancer | HTTP          |
-| 443   | Load Balancer | HTTPS         |
-| 4240  |               | Cilium Health |
-| 6443  | node-1        | K8s API       |
-| 8472  |               | VXLAN         |
-| 25565 | node-1        | Minecraft     |
-| 51871 |               | WireGuard     |
+| from Port | forward to IP | Description   |
+| --------- | ------------- | ------------- |
+| 80        | b-backup-01   | HTTP          |
+| 443       | b-backup-01   | HTTPS         |
+| 3901      | b-backup-01   | Garage S3 RPC |
