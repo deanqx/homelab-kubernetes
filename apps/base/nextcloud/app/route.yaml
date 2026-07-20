@@ -9,7 +9,7 @@ spec:
       namespace: gateway-system
       sectionName: https-nextcloud
   hostnames:
-    - "cloud.kowi.it"
+    - "cloud.deanqx.com"
   rules:
     - filters:
         - type: ResponseHeaderModifier

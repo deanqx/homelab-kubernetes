@@ -35,7 +35,7 @@ spec:
       type: ClusterIP
       port: 8080
     nextcloud:
-      host: cloud.kowi.it
+      host: cloud.deanqx.com
       existingSecret:
         enabled: true
         usernameKey: username
@@ -44,10 +44,10 @@ spec:
         proxies.config.php: |-
           <?php
           $CONFIG = array (
-            'overwritehost' => 'cloud.kowi.it',
+            'overwritehost' => 'cloud.deanqx.com',
             'overwriteprotocol' => 'https',
             'overwritewebroot' => '/',
-            'overwrite.cli.url' => 'https://cloud.kowi.it',
+            'overwrite.cli.url' => 'https://cloud.deanqx.com',
           );
         maintenance.config.php: |-
           <?php

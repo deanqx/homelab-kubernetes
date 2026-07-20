@@ -9,7 +9,7 @@ spec:
       namespace: gateway-system
       sectionName: https-monitor
   hostnames:
-    - "monitor.kowi.it"
+    - "monitor.deanqx.com"
   rules:
     - filters:
         - type: ResponseHeaderModifier

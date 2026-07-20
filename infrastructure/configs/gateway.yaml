@@ -16,20 +16,8 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https-monitor
-      hostname: monitor.kowi.it
-      port: 443
-      protocol: HTTPS
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: monitor-kowi-it-tls
-            kind: Secret
     - name: https-home-assistant
-      hostname: home.kowi.it
+      hostname: home.deanqx.com
       port: 443
       protocol: HTTPS
       allowedRoutes:
@@ -38,10 +26,10 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: home-kowi-it-tls
+          - name: home-deanqx-com-tls
             kind: Secret
     - name: https-nextcloud
-      hostname: cloud.kowi.it
+      hostname: cloud.deanqx.com
       port: 443
       protocol: HTTPS
       allowedRoutes:
@@ -50,7 +38,19 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: cloud-kowi-it-tls
+          - name: cloud-deanqx-com-tls
+            kind: Secret
+    - name: https-monitor
+      hostname: monitor.deanqx.com
+      port: 443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: monitor-deanqx-com-tls
             kind: Secret
 ---
 apiVersion: gateway.networking.k8s.io/v1
