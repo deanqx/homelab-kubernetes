@@ -4,7 +4,7 @@ metadata:
   name: prometheus-stack
   namespace: monitoring
 spec:
-  interval: 24h
+  interval: 1h
   url: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
@@ -18,7 +18,7 @@ metadata:
   name: prometheus-stack
   namespace: monitoring
 spec:
-  interval: 12h
+  interval: 30m
   install:
     crds: Create
     remediation:

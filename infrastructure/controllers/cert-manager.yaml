@@ -4,7 +4,7 @@ metadata:
   name: cert-manager
   namespace: gateway-system
 spec:
-  interval: 24h
+  interval: 1h
   url: oci://quay.io/jetstack/charts/cert-manager
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
@@ -18,7 +18,7 @@ metadata:
   name: cert-manager
   namespace: gateway-system
 spec:
-  interval: 12h
+  interval: 30m
   install:
     crds: Create
     remediation:

@@ -4,5 +4,3 @@ resources:
   - postgresql-secret.yaml
   - redis-secret.yaml
   - ../../../base/nextcloud/database
-patches:
-  - path: versions.yaml

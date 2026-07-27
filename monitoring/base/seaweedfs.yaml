@@ -4,7 +4,7 @@ metadata:
   name: seaweedfs
   namespace: monitoring
 spec:
-  interval: 24h
+  interval: 1h
   url: https://seaweedfs.github.io/seaweedfs/helm
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -13,7 +13,7 @@ metadata:
   name: seaweedfs
   namespace: monitoring
 spec:
-  interval: 12h
+  interval: 30m
   install:
     crds: Create
     remediation:

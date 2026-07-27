@@ -4,7 +4,7 @@ metadata:
   name: grafana-charts
   namespace: monitoring
 spec:
-  interval: 24h
+  interval: 1h
   url: https://grafana.github.io/helm-charts
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -15,7 +15,7 @@ metadata:
 spec:
   dependsOn:
     - name: loki
-  interval: 12h
+  interval: 30m
   install:
     crds: Create
     remediation:

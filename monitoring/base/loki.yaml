@@ -4,7 +4,7 @@ metadata:
   name: loki
   namespace: monitoring
 spec:
-  interval: 24h
+  interval: 1h
   url: oci://ghcr.io/grafana-community/helm-charts/loki
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
@@ -20,7 +20,7 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-stack
-  interval: 12h
+  interval: 30m
   install:
     crds: Create
     remediation:

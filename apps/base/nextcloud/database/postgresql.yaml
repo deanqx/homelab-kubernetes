@@ -4,11 +4,13 @@ metadata:
   name: postgresql
   namespace: nextcloud
 spec:
-  interval: 24h
+  interval: 1h
   url: oci://registry-1.docker.io/bitnamicharts/postgresql
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
     operation: copy
+  ref:
+    semver: "${postgresql_version}"
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -16,7 +18,7 @@ metadata:
   name: postgresql
   namespace: nextcloud
 spec:
-  interval: 12h
+  interval: 30m
   install:
     remediation:
       retries: 3

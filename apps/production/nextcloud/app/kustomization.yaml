@@ -3,5 +3,3 @@ kind: Kustomization
 resources:
   - ../../../base/nextcloud/app
   - secret.yaml
-patches:
-  - path: versions.yaml
