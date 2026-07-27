@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deanqx-com
+  namespace: deanqx-com
+  labels:
+    app: deanqx-com
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # Spin up 1 new pod before killing an old one
+      maxSurge: 1
+      # Always keep 100% (2 pods) ready to answer requests
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: deanqx-com
+  template:
+    metadata:
+      labels:
+        app: deanqx-com
+    spec:
+      containers:
+        - name: deanqx-com
+          image: ghcr.io/deanqx/deanqx.com:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5

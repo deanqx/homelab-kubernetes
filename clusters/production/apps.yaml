@@ -6,7 +6,8 @@ metadata:
 spec:
   dependsOn:
     - name: monitoring
-  interval: 1h
+  # short delay for deanqx-com
+  interval: 2m
   retryInterval: 2m
   timeout: 5m
   prune: true

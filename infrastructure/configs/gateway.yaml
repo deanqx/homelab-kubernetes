@@ -16,6 +16,18 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-deanqx-com
+      hostname: www.deanqx.com
+      port: 443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: www-deanqx-com-tls
+            kind: Secret
     - name: https-home-assistant
       hostname: home.deanqx.com
       port: 443
