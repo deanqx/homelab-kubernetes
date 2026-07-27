@@ -74,6 +74,7 @@ like Word and Teams.
 | ------------ | ----------- | ----- | ----------- | ---------- | ------ | ------- |
 | dean-homelab | Intel N150  | 4     | 1159        | 2877       | 15 GB  | 460 GB  |
 | storage-01   | Intel E7500 | 2     | 399         | 683        | 3.7 GB | 800 GB  |
+
 CPU scores are measured with [Geekbench](https://geekbench.com).
 
 ## Network Structure
