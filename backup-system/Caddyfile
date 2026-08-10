@@ -1,3 +1,0 @@
-backup.deanqx.com:3900 {
-  reverse_proxy garage-s3:3900
-}
