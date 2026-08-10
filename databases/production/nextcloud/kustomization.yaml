@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - postgresql-secret.yaml
   - redis-secret.yaml
-  - ../../../base/nextcloud/database
+  - ../../base/nextcloud
