@@ -181,9 +181,9 @@ was used in this guide.
 
 Before continuing push the updated `cilium.yaml` to Git.
 
-## 3 FluxCD Deployment
+## 3 FluxCD Installation
 
-### Generate Deployment Keys
+[Official Docs](https://fluxcd.io/flux/installation/bootstrap/generic-git-server/)
 
 Generate SSH Key without password and save it to a temporary location.
 
@@ -198,55 +198,25 @@ Generating public/private ed25519 key pair.
 Enter file in which to save the key (/home/dean/.ssh/id_ed25519): /tmp/flux_ssh
 ```
 
-Give read permissions of public key (`/tmp/flux_ssh.pub`) to Git repository.
+Give read and write permissions of public key (`/tmp/flux_ssh.pub`) to the Git
+repository. Write access is required to update versions automatically.
 
-```bash
+```sh
 cat /tmp/flux_ssh.pub
 ```
 
-### Set Flux Credentials
+Install Flux:
 
-Add SSH key and known hosts as secret.
-
-```bash
-ssh-keyscan -T 240 codeberg.org | tee /tmp/flux_known_hosts
+```sh
+flux bootstrap git \
+  --url=ssh://git@github.com/deanqx/homelab-kubernetes.git \
+  --branch=main \
+  --private-key-file=/tmp/flux_ssh \
+  --path=clusters/production
 ```
 
-```bash
-kubectl create namespace flux-system
-kubectl create secret generic flux-system \
-  --namespace=flux-system \
-  --from-file=identity=/tmp/flux_ssh \
-  --from-file=known_hosts=/tmp/flux_known_hosts
-```
-
-### Install Flux
-
-```bash
-kubectl apply -f clusters/production/flux-system/gotk-components.yaml
-```
-
-Check if Pods are ready:
-
-```bash
-kubectl -n flux-system get pod
-```
-
-Update the specified repository URL in `gotk-sync.yaml`, then apply it:
-
-```bash
-kubectl apply -f clusters/production/flux-system/gotk-sync.yaml
-```
-
-Check if installation was successful (all Kustomizations except `apps` should be ready):
-
-```bash
-flux get source git
-flux get kustomization
-```
-
-Next complete
-[Generate encryption key for secrets](#generate-encryption-key-for-secrets).
+Before continuing, complete
+[Generate encryption key for secrets](../README.md#generate-encryption-key-for-secrets).
 
 ## 4 Longhorn storage
 
