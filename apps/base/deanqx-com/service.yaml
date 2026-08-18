@@ -9,4 +9,4 @@ spec:
     - port: 80
       targetPort: 80
   selector:
-    app: deanqx-com
+    app.kubernetes.io/name: deanqx-com

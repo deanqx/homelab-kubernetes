@@ -28,7 +28,7 @@ metadata:
   name: deanqx-com
   namespace: deanqx-com
   labels:
-    app: deanqx-com
+    app.kubernetes.io/name: deanqx-com
 spec:
   replicas: 2
   strategy:
@@ -40,11 +40,11 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: deanqx-com
+      app.kubernetes.io/name: deanqx-com
   template:
     metadata:
       labels:
-        app: deanqx-com
+        app.kubernetes.io/name: deanqx-com
     spec:
       containers:
         - name: deanqx-com
