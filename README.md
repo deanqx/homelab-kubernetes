@@ -313,6 +313,12 @@ Check if Helm installations were successful.
 flux get hr -A
 ```
 
+Find reason for stuck reconciliation with logs:
+
+```sh
+kubectl describe kustomizations apps
+```
+
 ## Longhorn Storage
 
 When deployments are deleted and created again they often leave claimed volumes

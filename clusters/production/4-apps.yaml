@@ -6,8 +6,7 @@ metadata:
 spec:
   dependsOn:
     - name: databases
-  # short delay for deanqx-com to pull latest
-  interval: 2m
+  interval: 1h
   retryInterval: 2m
   timeout: 5m
   prune: true
