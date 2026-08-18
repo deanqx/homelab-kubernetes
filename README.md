@@ -6,9 +6,8 @@ _A project written by a human_
 This repository contains the Kubernetes manifests to control my homelab server
 cluster.
 
-- Main Repository: [Codeberg deanqx/homelab-kubernetes](https://codeberg.org/deanqx/homelab-kubernetes)
-- Mirror: [GitHub deanqx/homelab-kubernetes](https://github.com/deanqx/homelab-kubernetes)
-- Host system config: [Codeberg deanqx/homelab-nixos](https://codeberg.org/deanqx/homelab-nixos)
+- Repository: [GitHub deanqx/homelab-kubernetes](https://github.com/deanqx/homelab-kubernetes)
+- Host system config: [GitHub deanqx/homelab-nixos](https://github.com/deanqx/homelab-nixos)
 
 Overview
 ========
