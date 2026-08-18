@@ -65,6 +65,7 @@ spec:
         clusterPoolIPv4MaskSize: 24
     gatewayAPI:
       enabled: true
+      externalTrafficPolicy: "Local"
     hostFirewall:
       enabled: true
     operator:
