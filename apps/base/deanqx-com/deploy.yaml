@@ -48,7 +48,7 @@ spec:
     spec:
       containers:
         - name: deanqx-com
-          image: ghcr.io/deanqx/deanqx.com:20260825-212030-07caf39 # {"$imagepolicy": "flux-system:deanqx-com"}
+          image: ghcr.io/deanqx/deanqx.com:20260827-144344-f2f13bb # {"$imagepolicy": "flux-system:deanqx-com"}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
