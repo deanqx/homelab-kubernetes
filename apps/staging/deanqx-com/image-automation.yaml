@@ -1,0 +1,49 @@
+# ref: https://fluxcd.io/flux/guides/image-update/
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: deanqx-com-staging
+  namespace: deanqx-com-staging
+spec:
+  image: ghcr.io/deanqx/deanqx.com
+  interval: 1m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: deanqx-com-staging
+  namespace: deanqx-com-staging
+spec:
+  imageRepositoryRef:
+    name: deanqx-com-staging
+  filterTags: # example: 20260818-185547-16c4f14
+    pattern: "^[0-9]{8}-[0-9]{6}-[0-9a-f]+$"
+  policy:
+    alphabetical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: deanqx-com-staging
+  namespace: deanqx-com-staging
+spec:
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: fluxcdbot@users.noreply.github.com
+        name: fluxcdbot
+      messageTemplate: "staging {{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}"
+    push:
+      branch: main
+  interval: 1m
+  update:
+    path: ./apps/staging/deanqx-com
+    strategy: Setters

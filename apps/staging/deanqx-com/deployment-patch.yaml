@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deanqx-com
+  namespace: deanqx-com
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: deanqx-com
+          image: ghcr.io/deanqx/deanqx.com:20260831-164156-31be7f5 # {"$imagepolicy": "deanqx-com-staging:deanqx-com-staging"}

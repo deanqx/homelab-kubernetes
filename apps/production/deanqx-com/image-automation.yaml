@@ -1,0 +1,47 @@
+# ref: https://fluxcd.io/flux/guides/image-update/
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: deanqx-com
+  namespace: deanqx-com
+spec:
+  image: ghcr.io/deanqx/deanqx.com
+  interval: 1m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: deanqx-com
+  namespace: deanqx-com
+spec:
+  imageRepositoryRef:
+    name: deanqx-com
+  policy:
+    semver:
+      range: '>=0.0.0'
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: deanqx-com
+  namespace: deanqx-com
+spec:
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: fluxcdbot@users.noreply.github.com
+        name: fluxcdbot
+      messageTemplate: "production {{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}"
+    push:
+      branch: main
+  interval: 1m
+  update:
+    path: ./apps/production/deanqx-com
+    strategy: Setters
