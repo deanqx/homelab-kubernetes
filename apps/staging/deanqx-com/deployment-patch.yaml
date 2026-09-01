@@ -9,4 +9,4 @@ spec:
     spec:
       containers:
         - name: deanqx-com
-          image: ghcr.io/deanqx/deanqx.com:20260901-114157-d47f243 # {"$imagepolicy": "deanqx-com-staging:deanqx-com-staging"}
+          image: ghcr.io/deanqx/deanqx.com:20260901-133433-d13d24b # {"$imagepolicy": "deanqx-com-staging:deanqx-com-staging"}
