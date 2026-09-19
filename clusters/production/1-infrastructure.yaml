@@ -47,7 +47,7 @@ spec:
   postBuild:
     substitute:
       # https://github.com/cilium/cilium/releases
-      cilium_version: "^1"
+      cilium_version: "1.19.8"
       # https://github.com/cert-manager/cert-manager/releases
       cert_manager_version: "^1"
       # https://github.com/longhorn/charts/releases
